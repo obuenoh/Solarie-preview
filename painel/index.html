@@ -1,0 +1,604 @@
+<meta charset="utf-8">
+<title>Painel Solarie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500&family=Quicksand:wght@400;500;600&family=DM+Mono:wght@300;400;500&display=swap">
+
+<style>
+/* Identidade Solarie — areia, taupe, bronze. Traço fino, sem sombra,
+   raio mínimo. Cores de UI vêm do design-guide; as cores de DADO são
+   derivadas mais escuras, porque a paleta da marca é dessaturada de
+   propósito e não alcança o piso de saturação de gráfico. */
+:root{
+  --bg:#F2E6D9;          /* areia */
+  --card:#FBF6EF;        /* areia clara, um degrau acima do fundo */
+  --card-2:#EFE3D4;      /* areia profunda para campos */
+  --ink:#242833;         /* carvão */
+  --ink-2:#6E6152;       /* taupe escurecido, legível sobre areia */
+  --ink-3:#927F67;       /* taupe da marca */
+  --rule:rgba(146,127,103,.30);
+  --rule-2:rgba(146,127,103,.16);
+  --brand:#AC8D60;       /* bronze da marca — só UI, nunca dado */
+  --accent:#A3701F;      /* bronze de dado, validado */
+  --accent-w:#EADCC7;
+  --act:#2a78d6;   --act-w:#DDE7F5;  --act-ink:#1E5DA8;
+  --crit:#C13B6A;  --crit-w:#F4DCE3; --crit-ink:#8E2A4D;
+  --grid:rgba(146,127,103,.20);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#242833;        /* carvão da marca */
+    --card:#2C3140;
+    --card-2:#353B4C;
+    --ink:#F2E6D9;       /* areia como tinta */
+    --ink-2:#C3B49F;
+    --ink-3:#9A8B78;
+    --rule:rgba(242,230,217,.20);
+    --rule-2:rgba(242,230,217,.10);
+    --brand:#C4B197;
+    --accent:#B8842A;
+    --accent-w:#3A2E19;
+    --act:#3987e5;   --act-w:#1B2740;  --act-ink:#8FBBEE;
+    --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
+    --grid:rgba(242,230,217,.13);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#242833;
+  --card:#2C3140;
+  --card-2:#353B4C;
+  --ink:#F2E6D9;
+  --ink-2:#C3B49F;
+  --ink-3:#9A8B78;
+  --rule:rgba(242,230,217,.20);
+  --rule-2:rgba(242,230,217,.10);
+  --brand:#C4B197;
+  --accent:#B8842A;
+  --accent-w:#3A2E19;
+  --act:#3987e5;   --act-w:#1B2740;  --act-ink:#8FBBEE;
+  --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
+  --grid:rgba(242,230,217,.13);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Quicksand,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.55;
+  font-weight:500;-webkit-font-smoothing:antialiased;
+}
+/* Urbanist nos títulos, Quicksand no corpo — como no site.
+   DM Mono só onde dígito precisa alinhar em coluna. */
+h1,h2,h3,.kpi-v,.wm{font-family:Urbanist,"Helvetica Neue",Arial,sans-serif}
+.mono,.kpi-v,.kpi-k,.kpi-d,td.n,th.n,th,.pill,.upd,.axis text,.psub,.tip,.custom input,.mg input,.mg label,.lf label,.demo-strip
+  {font-family:"DM Mono",ui-monospace,monospace}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3{margin:0;font-weight:400;letter-spacing:-.005em}
+
+/* ---------- login ---------- */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100}
+.lbox{background:var(--card);border:1px solid var(--rule);padding:34px;max-width:390px;width:100%;border-radius:2px}
+.lbox .mark{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.lbox svg{width:40px;color:var(--ink)}
+.lbox .wm{font-size:17px;letter-spacing:.28em;text-transform:uppercase;font-weight:300}
+.lbox h2{font-size:20px;margin-bottom:4px}
+.lbox p.sub{color:var(--ink-2);font-size:14px;margin:0 0 20px}
+.lf{margin-bottom:13px}
+.lf label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px;font-family:"DM Mono",monospace}
+.lf input{width:100%;padding:10px 12px;font-size:15px;font-family:inherit;background:var(--card-2);color:var(--ink);border:1px solid var(--rule);border-radius:2px}
+.lf input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.lbtn{width:100%;padding:11px;background:var(--ink);color:var(--bg);border:0;border-radius:2px;font-size:14px;font-weight:600;letter-spacing:.06em}
+.lbtn:hover{opacity:.88}
+.demo-note{margin-top:18px;padding:11px 13px;background:var(--act-w);border-left:3px solid var(--act);font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.demo-note b{color:var(--ink)}
+
+/* ---------- shell ---------- */
+.top{background:var(--card);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:40}
+.top-in{max-width:1240px;margin:0 auto;padding:13px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px}
+.brand svg{width:34px;color:var(--ink)}
+.brand .wm{font-size:14.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:300}
+.brand .tagline{font-size:11px;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;font-family:"DM Mono",monospace;border-left:1px solid var(--rule);padding-left:12px;margin-left:4px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.upd{font-size:11.5px;color:var(--ink-3);font-family:"DM Mono",monospace}
+.tbtn{background:none;border:1px solid var(--rule);color:var(--ink-2);border-radius:2px;padding:6px 10px;font-size:12px}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+main{max-width:1240px;margin:0 auto;padding:20px 20px 70px}
+
+/* ---------- filtros ---------- */
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.seg{display:flex;background:var(--card);border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.seg button{background:none;border:0;padding:8px 14px;font-size:13.5px;color:var(--ink-2);border-right:1px solid var(--rule);font-weight:500}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.seg button:hover:not([aria-pressed="true"]){background:var(--card-2)}
+.seg button:focus-visible,.tbtn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.custom{display:none;gap:7px;align-items:center;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:5px 9px}
+.custom.on{display:flex}
+.custom input{font-family:"DM Mono",monospace;font-size:12.5px;padding:4px 6px;background:var(--card-2);color:var(--ink);border:1px solid var(--rule);border-radius:2px}
+.custom span{font-size:12px;color:var(--ink-3)}
+
+/* ---------- cards ---------- */
+.card{background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:18px 20px;margin-bottom:16px}
+.ch{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.ch h2{font-size:16.5px}
+.ch .q{font-size:13px;color:var(--ink-3);font-style:italic}
+.chelp{font-size:13px;color:var(--ink-2);margin:0 0 16px}
+
+/* ---------- kpis ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:14px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:15px 17px}
+.kpi-k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-family:"DM Mono",monospace;margin-bottom:7px}
+.kpi-v{font-size:28px;font-weight:400;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi-d{font-size:12.5px;margin-top:6px;color:var(--ink-3);font-family:"DM Mono",monospace}
+.kpi-d.up{color:var(--act)} .kpi-d.dn{color:var(--crit-ink)}
+
+/* ---------- grafico ---------- */
+.chart-wrap{position:relative;width:100%;overflow-x:auto}
+svg.chart{display:block;width:100%;height:auto}
+.axis text{font-size:10.5px;fill:var(--ink-3)}
+.gl{stroke:var(--grid);stroke-width:1}
+.tip{
+  position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--rule);
+  border-radius:2px;padding:8px 11px;font-size:12.5px;
+  font-family:"DM Mono",monospace;opacity:0;transition:opacity .1s;z-index:10;white-space:nowrap
+}
+.tip b{display:block;font-size:11px;color:var(--ink-3);font-weight:500;margin-bottom:3px}
+
+/* ---------- barras ---------- */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:12px;align-items:center}
+/* min-width:0 — sem isso o label de texto longo nao encolhe e empurra
+   a coluna do valor para fora da tela no celular. */
+.bar-row>div:first-child{min-width:0}
+.bar-lab{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bar-track{height:9px;background:var(--rule-2);border-radius:0;margin-top:5px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:0}
+.bar-val{font-family:"DM Mono",monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+
+/* ---------- tabelas ---------- */
+.tw{overflow-x:auto;margin:0 -4px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-weight:600}
+td{padding:10px;border-bottom:1px solid var(--rule-2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pname{font-weight:500}
+.psub{font-size:11.5px;color:var(--ink-3);font-family:"DM Mono",monospace}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:3px 8px;border-radius:2px;letter-spacing:.04em;white-space:nowrap}
+.pill.act{background:var(--act-w);color:var(--act)}
+.pill.crit{background:var(--crit-w);color:var(--crit-ink)}
+.pill.calm{background:var(--rule-2);color:var(--ink-3)}
+.pill i{font-style:normal;font-size:11px}
+
+/* ---------- margem ---------- */
+.mg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:11px;margin-bottom:16px}
+.mg{background:var(--card-2);border:1px solid var(--rule);border-radius:2px;padding:10px 12px}
+.mg label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  font-family:"DM Mono",monospace;margin-bottom:6px}
+.mg input{width:100%;font-family:"DM Mono",monospace;font-size:16px;padding:5px 8px;
+  background:var(--card);color:var(--ink);border:1px solid var(--rule);border-radius:2px;font-variant-numeric:tabular-nums}
+.mg input:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+.warnbox{background:var(--crit-w);border-left:3px solid var(--crit);padding:12px 15px;
+  font-size:13px;color:var(--ink-2);margin-bottom:16px;line-height:1.55}
+.warnbox b{color:var(--ink)}
+.infobox{background:var(--act-w);border-left:3px solid var(--act);padding:12px 15px;
+  font-size:13px;color:var(--ink-2);margin-bottom:16px;line-height:1.55}
+.infobox b{color:var(--ink)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.empty{color:var(--ink-3);font-size:13.5px;padding:16px 0;text-align:center}
+
+.demo-strip{background:var(--accent);color:#fff;text-align:center;padding:7px 16px;
+  font-size:12px;font-family:"DM Mono",monospace;letter-spacing:.05em}
+
+footer{max-width:1240px;margin:0 auto;padding:0 20px 50px;font-size:12px;color:var(--ink-3);
+  font-family:"DM Mono",monospace;line-height:1.85}
+
+@media(max-width:820px){ .two{grid-template-columns:1fr} }
+@media(max-width:520px){
+  .top-in{padding:11px 14px} .brand .tagline{display:none}
+  main{padding:14px 14px 50px} .card{padding:15px 14px}
+  .kpi-v{font-size:23px}
+  .bar-row{grid-template-columns:minmax(0,1fr) 64px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="demo-strip" id="strip">PROTÓTIPO · dados de venda simulados · catálogo real de 402 produtos</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="lbox">
+    <div class="mark">
+      <svg viewBox="0 0 400 165" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M 158 150 A 42 42 0 0 1 242 150"/><line x1="155" y1="150" x2="82" y2="150"/><line x1="157.2" y1="136.1" x2="67.8" y2="107"/><line x1="163.6" y1="123.5" x2="72.2" y2="57.1"/><line x1="173.5" y1="113.6" x2="98.3" y2="10"/><line x1="186.1" y1="107.2" x2="143.6" y2="-23.7"/><line x1="200" y1="105" x2="200" y2="-36"/><line x1="213.9" y1="107.2" x2="256.4" y2="-23.7"/><line x1="226.5" y1="113.6" x2="301.7" y2="10"/><line x1="236.4" y1="123.5" x2="327.8" y2="57.1"/><line x1="242.8" y1="136.1" x2="332.2" y2="107"/><line x1="245" y1="150" x2="318" y2="150"/></g></svg>
+      <span class="wm">Solarie</span>
+    </div>
+    <h2>Painel da loja</h2>
+    <p class="sub">Entre para ver o desempenho das suas vendas.</p>
+    <form id="lform">
+      <div class="lf"><label for="u">E-mail</label><input id="u" type="email" value="contato@shopsolarie.com" autocomplete="username"></div>
+      <div class="lf"><label for="pw">Senha</label><input id="pw" type="password" value="demo" autocomplete="current-password"></div>
+      <button class="lbtn" type="submit">Entrar</button>
+    </form>
+    <div class="demo-note">
+      <b>Isto é um protótipo.</b> Esta tela demonstra o fluxo de acesso — ela não protege nada.
+      Qualquer senha entra. A autenticação de verdade vem da própria Shopify quando o painel for
+      instalado como app do admin dela.
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" hidden>
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <svg viewBox="0 0 400 165" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M 158 150 A 42 42 0 0 1 242 150"/><line x1="155" y1="150" x2="82" y2="150"/><line x1="157.2" y1="136.1" x2="67.8" y2="107"/><line x1="163.6" y1="123.5" x2="72.2" y2="57.1"/><line x1="173.5" y1="113.6" x2="98.3" y2="10"/><line x1="186.1" y1="107.2" x2="143.6" y2="-23.7"/><line x1="200" y1="105" x2="200" y2="-36"/><line x1="213.9" y1="107.2" x2="256.4" y2="-23.7"/><line x1="226.5" y1="113.6" x2="301.7" y2="10"/><line x1="236.4" y1="123.5" x2="327.8" y2="57.1"/><line x1="242.8" y1="136.1" x2="332.2" y2="107"/><line x1="245" y1="150" x2="318" y2="150"/></g></svg>
+    <span class="wm">Solarie</span><span class="tagline">Painel da loja</span>
+  </div>
+  <div class="right">
+    <span class="upd" id="upd"></span>
+    <button class="tbtn" id="theme" title="Alternar tema">◐ Tema</button>
+  </div>
+</div></header>
+
+<main>
+  <div class="filters">
+    <div class="seg" id="seg">
+      <button data-d="0"   aria-pressed="false">Hoje</button>
+      <button data-d="7"   aria-pressed="false">7 dias</button>
+      <button data-d="30"  aria-pressed="true">30 dias</button>
+      <button data-d="90"  aria-pressed="false">90 dias</button>
+      <button data-d="cus" aria-pressed="false">Personalizado</button>
+    </div>
+    <div class="custom" id="cus">
+      <span>de</span><input type="date" id="d1"><span>até</span><input type="date" id="d2">
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- vendas no tempo -->
+  <div class="card">
+    <div class="ch"><h2>Vendas ao longo do tempo</h2><span class="q">como foi o período?</span></div>
+    <p class="chelp">Receita por dia. Passe o dedo ou o mouse sobre o gráfico para ver o valor de cada dia.</p>
+    <div class="chart-wrap" id="cw"><svg class="chart" id="line" viewBox="0 0 900 260" role="img" aria-label="Receita por dia no período"></svg><div class="tip" id="tip"></div></div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <div class="ch"><h2>Mais vendidos</h2><span class="q">o que vende mais?</span></div>
+      <p class="chelp">Top 8 por unidades no período.</p>
+      <div class="bars" id="top"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>Menos vendidos</h2><span class="q">o que vende menos?</span></div>
+      <p class="chelp">Vendeu pouco, mas ainda vendeu. Quem não vendeu nada está no quadro de parados.</p>
+      <div class="bars" id="bot"></div>
+    </div>
+  </div>
+
+  <!-- reposicao -->
+  <div class="card">
+    <div class="ch"><h2>Precisa comprar de novo</h2><span class="q">o que preciso repor?</span></div>
+    <p class="chelp">Peças que vão acabar antes de 30 dias, no ritmo de venda do período. Ordenado por urgência.</p>
+    <div class="tw"><table id="repor"></table></div>
+  </div>
+
+  <!-- parados -->
+  <div class="card">
+    <div class="ch"><h2>Peças paradas</h2><span class="q">o que está parado?</span></div>
+    <p class="chelp">Sem nenhuma venda no período, com estoque na prateleira. É dinheiro parado.</p>
+    <div class="infobox" id="paradosum"></div>
+    <div class="tw"><table id="parados"></table></div>
+  </div>
+
+  <!-- lucro -->
+  <div class="card">
+    <div class="ch"><h2>Mais lucrativos</h2><span class="q">o que me dá mais lucro?</span></div>
+    <div class="warnbox">
+      <b>Este quadro é uma estimativa, não um número medido.</b> O custo de cada peça ainda não está
+      cadastrado na loja — sem ele não existe lucro real. Informe abaixo a margem média que você tem
+      em cada categoria e o painel calcula por aproximação. Quando o custo por peça for preenchido na
+      Shopify, este quadro passa a mostrar o lucro de verdade e estes campos somem.
+    </div>
+    <div class="mg-grid" id="mgs"></div>
+    <div class="tw"><table id="lucro"></table></div>
+  </div>
+
+  <!-- categorias -->
+  <div class="card">
+    <div class="ch"><h2>Vendas por categoria</h2><span class="q">de onde vem o faturamento?</span></div>
+    <p class="chelp">Receita do período somada por tipo de peça.</p>
+    <div class="bars" id="cats"></div>
+  </div>
+</main>
+
+<footer>
+  Painel Solarie · protótipo navegável<br>
+  Catálogo: 402 produtos reais (auditoria de 24/08/2026) — títulos, preços e categorias verdadeiros.<br>
+  Vendas, estoque e margem: <b>simulados</b> para demonstrar o funcionamento. Nenhum número aqui é venda real.<br>
+  Ao ligar na Shopify Admin API, os mesmos quadros passam a ler os pedidos verdadeiros.
+</footer>
+</div>
+
+<script>
+const CAT = [{"h":"aqua-green-heart-trio-earrings","t":"Aqua Green Heart Earrings","p":12,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2026-03-10"},{"h":"smooth-duo-piercing-earrings","t":"Smooth Duo Piercing Earrings","p":10,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-07-12"},{"h":"children-s-small-chunky-link-bracelet-pp","t":"Children’s Small Chunky Link Bracelet (PP)","p":22,"c":"Bracelets","m":"18k Gold Plated","s":14,"d":"2025-12-15"},{"h":"worked-heart-necklace","t":"Worked heart necklace","p":40,"c":"Necklaces","m":"18k Gold Plated","s":26,"d":"2025-09-08"},{"h":"heart-pinky-ring-with-zirconia-rhodium-plated","t":"Heart Pinky Ring with Zirconia Rhodium Plated","p":33,"c":"Rings","m":"White Gold Plated","s":20,"d":"2026-06-21"},{"h":"kids-fixed-bee-stud-earrings-crystal-pave","t":"Kids Fixed Bee Stud Earrings – Crystal Pave","p":41,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2025-12-11"},{"h":"soccer-player-necklace","t":"Soccer Player  Necklace","p":65,"c":"Necklaces","m":"18k Gold Plated","s":14,"d":"2026-05-24"},{"h":"three-drop-earrings","t":"Three Drop Earrings","p":32,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2026-06-21"},{"h":"synthetic-pearl-clover-inspiration-necklace","t":"Synthetic pearl clover inspiration necklace","p":36.4,"c":"Necklaces","m":"18k Gold Plated","s":5,"d":"2025-09-08"},{"h":"round-zirconia-pinky-ring","t":"Round Zirconia Pinky Ring","p":54,"c":"Rings","m":"18k Gold Plated","s":11,"d":"2026-06-21"},{"h":"initial-pinky-ring","t":"Initial Pinky Ring","p":68,"c":"Rings","m":"18k Gold Plated","s":1,"d":"2026-03-13"},{"h":"silver-riviera-necklace","t":"Silver Riviera Necklace","p":156,"c":"Necklaces","m":"Sterling Silver 925","s":15,"d":"2026-01-26"},{"h":"organic-square-earrings","t":"Organic Square Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2026-03-07"},{"h":"adjustable-double-two-tone-ring","t":"Adjustable Double Two-Tone Ring","p":69,"c":"Rings","m":"18k Gold Plated","s":25,"d":"2025-03-26"},{"h":"mother-of-pearl-flower-earrings-18k-gold-plated","t":"Mother of Pearl Flower Earrings – 18k Gold Plated","p":18,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2026-03-11"},{"h":"crystal-candle-piercing","t":"Crystal Candle Piercing","p":25,"c":"Earrings","m":"18k Gold Plated","s":21,"d":"2026-06-21"},{"h":"children-s-hollow-heart-jewelry-set","t":"Children’s Hollow Heart Jewelry","p":22,"c":"Necklaces","m":"18k Gold Plated","s":3,"d":"2025-12-15"},{"h":"pink-solitaire-ring-with-side-pave","t":"Pink Solitaire Ring with Side Pavé","p":30,"c":"Rings","m":"18k Gold Plated","s":8,"d":"2026-01-28"},{"h":"long-necklace-with-hangings","t":"Long necklace with hangings","p":44.8,"c":"Necklaces","m":"18k Gold Plated","s":24,"d":"2025-09-08"},{"h":"bee-base-ball-earrings","t":"Bee Base Ball Earrings","p":34,"c":"Earrings","m":"18k Gold Plated","s":25,"d":"2026-03-10"},{"h":"butterfly-ring","t":"Butterfly Ring","p":40,"c":"Rings","m":"Sterling Silver 925","s":2,"d":"2025-03-23"},{"h":"butterfly-pearl-hoop-earrings","t":"Butterfly Pearl Hoop Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-07-12"},{"h":"organic-synthetic-resin-necklace-70-cm","t":"Organic Synthetic Resin Necklace – 70 cm","p":18,"c":"Necklaces","m":"18k Gold Plated","s":6,"d":"2026-03-10"},{"h":"pave-hoop-earrings","t":"Pavé Hoop Earrings","p":16,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2026-03-06"},{"h":"half-eternity-zirconia-ring","t":"Half Eternity Zirconia Ring","p":45,"c":"Rings","m":"18k Gold Plated","s":10,"d":"2026-06-21"},{"h":"pave-flower-ring-with-white-half-solitaire","t":"Pavé Flower Ring with White Half Solitaire","p":46,"c":"Rings","m":"18k Gold Plated","s":19,"d":"2026-07-12"},{"h":"infinity-pave-earrings","t":"Infinity Pavé Earrings","p":38,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-03-05"},{"h":"pearl-ring-with-detailed-band","t":"Pearl Ring with Detailed Band","p":17,"c":"Rings","m":"18k Gold Plated","s":13,"d":"2026-01-28"},{"h":"heart-earrings","t":"Heart Earrings","p":24,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2026-03-07"},{"h":"colorful-pave-bracelet","t":"Colorful Pavé Bracelet","p":60,"c":"Bracelets","m":"18k Gold Plated","s":22,"d":"2026-03-06"},{"h":"flame-necklace","t":"Flame Necklace","p":40,"c":"Necklaces","m":"18k Gold Plated","s":16,"d":"2026-07-12"},{"h":"small-heart-necklace","t":"Small heart necklace","p":20.3,"c":"Necklaces","m":"18k Gold Plated","s":15,"d":"2025-09-08"},{"h":"pave-nail-inspired-bracelet","t":"Pavé Nail-Inspired Bracelet","p":76,"c":"Bracelets","m":"18k Gold Plated","s":23,"d":"2026-03-05"},{"h":"square-boot-earrings","t":"Square Boot Earrings","p":35,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-03-07"},{"h":"pink-quartz-teardrop-set-45-cm","t":"Pink Quartz Teardrop Set – 45 cm","p":92,"c":"Sets","m":"18k Gold Plated","s":23,"d":"2026-03-08"},{"h":"pearl-clover-inspired-bracelet","t":"Pearl clover inspired bracelet","p":29,"c":"Bracelets","m":"18k Gold Plated","s":8,"d":"2025-09-08"},{"h":"striped-heart-earrings","t":"Striped Heart Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2026-06-21"},{"h":"fine-long-necklace-with-smooth-drop-pendant","t":"Fine Long Necklace with Smooth Drop Pendant","p":59,"c":"Necklaces","m":"18k Gold Plated","s":19,"d":"2026-04-26"},{"h":"wavy-heart-earrings","t":"Wavy Heart Earrings","p":29,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-06-21"},{"h":"smooth-hoop-earrings","t":"Smooth Hoop Earrings","p":42,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2026-03-10"},{"h":"triangle-pearl-earrings","t":"Triangle Pearl Earrings","p":18,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2026-03-10"},{"h":"pave-clover-ring-with-gold-tone-border-delicate-and-lucky-elegance","t":"Pave Clover Ring with Gold-Tone Border – Delicate and Lucky Elegance","p":50,"c":"Rings","m":"18k Gold Plated","s":19,"d":"2025-07-02"},{"h":"fine-diamond-cut-bracelet-15-5cm","t":"Fine Diamond-Cut Bracelet 15+5cm","p":24,"c":"Bracelets","m":"18k Gold Plated","s":18,"d":"2026-06-21"},{"h":"zirconia-and-heart-eternity-band","t":"Zirconia and Heart Eternity Band","p":26,"c":"Rings","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"zirconia-paved-flower-ring","t":"Zirconia Paved Flower Ring","p":84,"c":"Rings","m":"18k Gold Plated","s":1,"d":"2025-03-27"},{"h":"kids-silver-flower-earrings-with-colored-details","t":"Kids’ Silver Flower Earrings with Colored Details","p":43,"c":"Earrings","m":"Sterling Silver 925","s":21,"d":"2025-12-12"},{"h":"tiger-eye-bead-bracelet","t":"Tiger Eye Bead Bracelet","p":87,"c":"Bracelets","m":"18k Gold Plated","s":10,"d":"2026-03-16"},{"h":"gold-floral-hoop-necklace-set","t":"Gold Floral Hoop Necklace Set","p":91,"c":"Sets","m":"18k Gold Plated","s":13,"d":"2025-03-24"},{"h":"zirconia-cartier-inspiration-necklace","t":"Zirconia cartier inspiration necklace","p":148,"c":"Necklaces","m":"18k Gold Plated","s":24,"d":"2025-09-08"},{"h":"eternal-rhodium-earrings","t":"Eternal Rhodium Earrings","p":34,"c":"Earrings","m":"White Gold Plated","s":18,"d":"2026-07-12"},{"h":"aqua-green-flower-earrings-crystal-zirconia","t":"Aqua Green Flower Earrings – Crystal \u0026 Zirconia","p":21,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-03-10"},{"h":"double-point-of-light-grey-zirconia-earrings","t":"Double Point of Light Grey Zirconia Earrings","p":44,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2026-06-21"},{"h":"pave-hoop-earrings-with-marquise-zirconia","t":"Pavé Hoop Earrings with Marquise Zirconia","p":53,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2026-03-06"},{"h":"heart-zirconia-ring","t":"Heart Zirconia Ring","p":25,"c":"Rings","m":"18k Gold Plated","s":27,"d":"2025-03-23"},{"h":"heart-locket-necklace","t":"heart locket necklace","p":50,"c":"Necklaces","m":"18k Gold Plated","s":1,"d":"2025-05-13"},{"h":"moon-and-star-choker","t":"Moon and Star Choker","p":20.3,"c":"Necklaces","m":"18k Gold Plated","s":19,"d":"2025-09-08"},{"h":"kids-heart-stud-earrings-with-sparkling-stone","t":"Kids’ Heart Stud Earrings with Sparkling Stone","p":14,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2025-12-12"},{"h":"resin-druzy-heart-necklace-45cm","t":"Resin Druzy Heart Necklace 45cm","p":40,"c":"Necklaces","m":"18k Gold Plated","s":8,"d":"2026-06-21"},{"h":"cracked-teardrop-earrings","t":"Cracked Teardrop Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-03-07"},{"h":"clovers-pave-ring","t":"Clovers Pave Ring","p":42,"c":"Rings","m":"18k Gold Plated","s":9,"d":"2025-03-23"},{"h":"nail-bracelet-with-zirconia-details","t":"Nail Bracelet with Zirconia Details","p":68,"c":"Bracelets","m":"18k Gold Plated","s":13,"d":"2026-03-06"},{"h":"dangling-clover-earrings-small-pave-clover-amp-larger-gold-clover-charm","t":"Dangling Clover Earrings – Small Pave Clover \u0026amp; Larger Gold Clover Charm","p":39.9,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2025-07-02"},{"h":"butterfly-pin","t":"Butterfly Pin","p":14,"c":"Necklaces","m":"Sterling Silver 925","s":18,"d":"2025-03-24"},{"h":"white-gold-engraved-heart-set","t":"White gold engraved heart set","p":104,"c":"Sets","m":"White Gold Plated","s":28,"d":"2025-09-08"},{"h":"set-of-studded-clover-inspiration","t":"Set of studded clover inspiration","p":98,"c":"Sets","m":"18k Gold Plated","s":10,"d":"2025-09-08"},{"h":"hanging-butterfly-earring","t":"Hanging butterfly earring (2)","p":64,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2025-09-08"},{"h":"point-of-light-earrings","t":"Point of Light Earrings","p":16,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2025-03-28"},{"h":"shell-pearl-piercing","t":"Shell Pearl Piercing","p":15,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2026-03-16"},{"h":"thin-ring-with-balls-and-zirconia-details","t":"Thin ring with balls and zirconia details","p":26,"c":"Rings","m":"18k Gold Plated","s":11,"d":"2025-09-08"},{"h":"resin-hoop-earrings","t":"Resin Hoop Earrings","p":13,"c":"Earrings","m":"18k Gold Plated","s":25,"d":"2025-03-27"},{"h":"pink-crystal-teardrop-earrings","t":"Pink Crystal Teardrop Earrings","p":23,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2026-03-16"},{"h":"spiral-rhodium-earrings","t":"Spiral Rhodium Earrings","p":30,"c":"Earrings","m":"White Gold Plated","s":26,"d":"2026-06-21"},{"h":"spiked-earring","t":"Spiked earring","p":43,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2025-09-08"},{"h":"inspired-pave-hoop-earrings","t":"Inspired Pavé Hoop Earrings","p":49,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2026-03-06"},{"h":"double-bow-and-heart","t":"Bow and Heart","p":16,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-03-22"},{"h":"pave-zirconia-band-ring","t":"Pavé Zirconia Band Ring","p":32,"c":"Rings","m":"18k Gold Plated","s":1,"d":"2026-03-06"},{"h":"figaro-candy-bracelet-solarie","t":"Figaro Candy Bracelet Solarie","p":27,"c":"Bracelets","m":"18k Gold Plated","s":18,"d":"2026-07-12"},{"h":"black-crystal-necklace-45-cm","t":"Black Crystal Necklace – 45 cm","p":38,"c":"Necklaces","m":"18k Gold Plated","s":23,"d":"2026-03-07"},{"h":"yellow-square-pave-solitaire-ring","t":"Yellow Square Pavé Solitaire Ring","p":57,"c":"Rings","m":"18k Gold Plated","s":10,"d":"2026-07-19"},{"h":"smooth-rhodium-piercing","t":"Smooth Rhodium Piercing","p":19,"c":"Earrings","m":"White Gold Plated","s":3,"d":"2026-06-21"},{"h":"silver-heart-light-point-necklace-amp-earrings-set","t":"Silver Heart Light Point Necklace; Earrings Set","p":62,"c":"Sets","m":"Sterling Silver 925","s":9,"d":"2026-01-26"},{"h":"geometric-mesh-teardrop-earrings-18k-gold-plated","t":"Geometric Mesh Teardrop Earrings – 18k Gold Plated","p":18,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2026-03-11"},{"h":"pearl-shell-hoop-earrings","t":"Pearl Shell Hoop Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2026-03-08"},{"h":"flower-ring-with-white-and-pink-zirconia","t":"Flower Ring with White and Pink Zirconia","p":28,"c":"Rings","m":"18k Gold Plated","s":10,"d":"2026-01-28"},{"h":"natural-stone-set-with-zirconia-1","t":"Natural stone set with zirconia","p":56,"c":"Sets","m":"18k Gold Plated","s":27,"d":"2025-09-08"},{"h":"green-crystal-shell-pearl-jewelry-set","t":"Green Crystal \u0026 Shell Pearl Jewelry Set","p":62,"c":"Sets","m":"18k Gold Plated","s":17,"d":"2026-03-11"},{"h":"tulum-ring","t":"Tulum Ring","p":47,"c":"Rings","m":"18k Gold Plated","s":22,"d":"2025-03-28"},{"h":"world-cup-star-necklace","t":"World Cup Star Necklace","p":43,"c":"Necklaces","m":"18k Gold Plated","s":1,"d":"2026-05-24"},{"h":"large-worked-ring","t":"Large worked ring","p":44,"c":"Earrings","m":"18k Gold Plated","s":23,"d":"2025-09-08"},{"h":"trio-heart-earring-with-smooth-and-paved-detailing","t":"Heart Earring with Smooth and Paved Detailing","p":29,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2025-03-22"},{"h":"large-worked-ring-1","t":"Large worked ring (1)","p":64,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2025-09-08"},{"h":"heart-link-necklace","t":"Heart link necklace","p":64,"c":"Necklaces","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"organic-drop-earrings","t":"Organic Drop Earrings","p":50,"c":"Earrings","m":"18k Gold Plated","s":11,"d":"2026-07-12"},{"h":"kids-teardrop-stud-earrings","t":"Kids’ Teardrop Stud Earrings","p":22,"c":"Earrings","m":"White Gold Plated","s":22,"d":"2025-12-12"},{"h":"sculptural-turquoise-resin-bangle-set","t":"Sculptural Turquoise Resin Bangle Set","p":33,"c":"Sets","m":"18k Gold Plated","s":17,"d":"2026-03-12"},{"h":"thick-pave-silver-hoop-earrings","t":"Thick Pavé Silver Hoop Earrings","p":77,"c":"Earrings","m":"Sterling Silver 925","s":25,"d":"2026-01-26"},{"h":"max-heart-earrings-with-zirconia","t":"Max Heart Earrings with Zirconia","p":40,"c":"Earrings","m":"18k Gold Plated","s":18,"d":"2026-06-21"},{"h":"colorful-heart-bracelet","t":"Colorful heart bracelet","p":98,"c":"Bracelets","m":"18k Gold Plated","s":27,"d":"2025-09-08"},{"h":"thick-wavy-ring","t":"Thick Wavy Ring","p":49,"c":"Rings","m":"18k Gold Plated","s":6,"d":"2025-03-23"},{"h":"r-light-point-necklace-square-amp-round-craved-design","t":"“R” Light Point Necklace – Square \u0026 Round Craved Design","p":111,"c":"Necklaces","m":"18k Gold Plated","s":1,"d":"2026-04-26"},{"h":"square-hoop-earrings-with-sparkling-stones","t":"Square Hoop Earrings with Sparkling Stones","p":33,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2026-03-06"},{"h":"adjustable-zirconia-point-ring","t":"Adjustable Zirconia Point Ring","p":28,"c":"Rings","m":"18k Gold Plated","s":10,"d":"2026-03-13"},{"h":"round-pearl-necklace","t":"Round Pearl Necklace","p":57,"c":"Necklaces","m":"18k Gold Plated","s":20,"d":"2025-05-14"},{"h":"mini-heart-necklace","t":"Mini Heart Necklace","p":28,"c":"Necklaces","m":"18k Gold Plated","s":26,"d":"2025-03-28"},{"h":"zirconia-necklace","t":"Zirconia necklace","p":55,"c":"Necklaces","m":"18k Gold Plated","s":26,"d":"2025-09-08"},{"h":"crystal-heart-bracelet","t":"Crystal Heart Bracelet","p":26,"c":"Bracelets","m":"18k Gold Plated","s":14,"d":"2026-07-12"},{"h":"heart-shaped-ruby-zirconia-ring","t":"Heart-Shaped Ruby Zirconia Ring","p":40,"c":"Rings","m":"18k Gold Plated","s":27,"d":"2025-03-26"},{"h":"engraved-inspiration-clover-set","t":"Engraved inspiration clover set","p":100,"c":"Sets","m":"Sterling Silver 925","s":2,"d":"2025-09-11"},{"h":"silver-light-point-necklace","t":"Silver Light Point Necklace","p":47,"c":"Necklaces","m":"Sterling Silver 925","s":2,"d":"2026-01-26"},{"h":"gold-crystal-necklace-58cm","t":"Gold Crystal Necklace 58cm","p":29,"c":"Necklaces","m":"18k Gold Plated","s":12,"d":"2026-06-21"},{"h":"shell-pearl-flower-base-earrings","t":"Shell Pearl Flower Base Earrings","p":32,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-03-10"},{"h":"colored-hanging-pebble-choker","t":"Colored Hanging Pebble Choker","p":18,"c":"Necklaces","m":"18k Gold Plated","s":5,"d":"2025-09-08"},{"h":"solitaire-ring-with-center-stone-and-zirconia-accents","t":"Solitaire Ring with Center Stone and Zirconia Accents","p":55,"c":"Rings","m":"Sterling Silver 925","s":21,"d":"2026-01-26"},{"h":"gold-u-link-chain-bracelet-with-one-pave-accent-link-bold-and-elegant","t":"Gold U-Link Chain Bracelet with One Pave Accent Link – Bold and Elegant","p":70,"c":"Necklaces","m":"18k Gold Plated","s":27,"d":"2025-07-02"},{"h":"butterfly-pearl-necklace","t":"Butterfly Pearl Necklace","p":33,"c":"Necklaces","m":"18k Gold Plated","s":18,"d":"2026-07-12"},{"h":"aurora-necklace","t":"Aurora Necklace","p":32,"c":"Necklaces","m":"18k Gold Plated","s":2,"d":"2026-07-12"},{"h":"three-row-colored-zirconia-ring","t":"Three-row colored zirconia ring","p":36,"c":"Rings","m":"18k Gold Plated","s":22,"d":"2025-09-11"},{"h":"lumiere-hoop-earrings","t":"Lumière Hoop Earrings","p":34,"c":"Earrings","m":"18k Gold Plated","s":21,"d":"2026-05-31"},{"h":"wavy-bold-hoop","t":"Wavy Bold Hoop","p":38,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2025-03-21"},{"h":"double-flower-statement-earrings-earthy-tones","t":"Double Flower Statement Earrings – Earthy Tones","p":16,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2026-03-11"},{"h":"delicate-infinity-ring","t":"Delicate Infinity Ring","p":17,"c":"Rings","m":"18k Gold Plated","s":17,"d":"2026-03-06"},{"h":"ring-model-1-rectangular-with-a-zirconia-stone","t":"Ring model 1 rectangular with a zirconia stone","p":28,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2025-09-08"},{"h":"gold-ring-with-black-stone-details","t":"Gold Ring with Black Stone Details","p":18,"c":"Rings","m":"18k Gold Plated","s":5,"d":"2026-03-06"},{"h":"thick-detailed-light-point-necklace","t":"Thick Detailed Light Point Necklace","p":68,"c":"Necklaces","m":"18k Gold Plated","s":15,"d":"2026-03-05"},{"h":"zirconia-detail-ring","t":"Zirconia Detail Ring","p":66,"c":"Rings","m":"18k Gold Plated","s":19,"d":"2025-09-11"},{"h":"half-eternity-pearl-shell-ring","t":"Half-Eternity Pearl Shell Ring","p":50,"c":"Rings","m":"18k Gold Plated","s":16,"d":"2026-03-08"},{"h":"u-link-chain-necklace-with-one-pave-accent-link-bold-and-modern-elegance","t":"U-Link Chain Necklace with One Pave Accent Link – Bold and Modern Elegance","p":100,"c":"Necklaces","m":"18k Gold Plated","s":26,"d":"2025-07-03"},{"h":"slim-pave-palm-tree-star-ring","t":"Slim Pavé Palm Tree \u0026 Star Ring","p":45,"c":"Rings","m":"18k Gold Plated","s":25,"d":"2026-01-29"},{"h":"thick-plain-hoop-earrings","t":"Thick Plain Hoop Earrings","p":22,"c":"Earrings","m":"Sterling Silver 925","s":24,"d":"2025-03-28"},{"h":"heart-candy-bracelet-solarie","t":"Heart Candy Bracelet Solarie","p":20,"c":"Bracelets","m":"18k Gold Plated","s":14,"d":"2026-07-12"},{"h":"geometric-striped-triangular-earrings-18k-gold-plated","t":"Geometric Striped Triangular Earrings – 18k Gold Plated","p":37,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2026-03-11"},{"h":"lv-studded-inspiration-necklace","t":"LV studded inspiration necklace","p":89,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2025-09-08"},{"h":"zirconia-flower-earring","t":"Zirconia flower earring","p":16,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2025-09-08"},{"h":"ball-choker-necklace-38-5-cm","t":"Ball Choker Necklace – 38 + 5 cm","p":31,"c":"Necklaces","m":"18k Gold Plated","s":15,"d":"2026-03-10"},{"h":"resin-teardrop-earrings","t":"Teardrop Earrings","p":18,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2026-03-16"},{"h":"bow-earrings-1","t":"Bow Earrings","p":32,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2026-07-12"},{"h":"maxi-rectangle-earrings","t":"Maxi Rectangle Earrings","p":22,"c":"Earrings","m":"18k Gold Plated","s":28,"d":"2026-03-16"},{"h":"choker-with-charms","t":"Choker with Charms","p":59,"c":"Necklaces","m":"18k Gold Plated","s":3,"d":"2025-09-08"},{"h":"textured-earrings","t":"Textured Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":23,"d":"2026-03-07"},{"h":"girl-pendant","t":"girl pendant","p":23,"c":"Necklaces","m":"18k Gold Plated","s":17,"d":"2025-05-13"},{"h":"initial-necklace-with-synthetic-pearls","t":"Initial necklace with synthetic pearls","p":37,"c":"Necklaces","m":"18k Gold Plated","s":10,"d":"2025-09-08"},{"h":"smooth-band-ring-with-white-solitaire","t":"Smooth Band Ring with White Solitaire","p":30,"c":"Rings","m":"18k Gold Plated","s":27,"d":"2026-07-12"},{"h":"thick-ribbon-bracelet","t":"thick ribbon bracelet","p":44,"c":"Bracelets","m":"18k Gold Plated","s":15,"d":"2025-09-08"},{"h":"princess-ring-1","t":"Princess ring","p":32,"c":"Rings","m":"18k Gold Plated","s":12,"d":"2025-09-08"},{"h":"silver-colored-flower-earring","t":"Silver colored flower earring  (2)","p":43,"c":"Earrings","m":"Sterling Silver 925","s":3,"d":"2025-09-08"},{"h":"square-pave-ring","t":"Square Pavé Ring","p":33,"c":"Rings","m":"18k Gold Plated","s":13,"d":"2026-07-12"},{"h":"zirconia-royalty-ring","t":"Zirconia royalty ring","p":66,"c":"Rings","m":"18k Gold Plated","s":19,"d":"2025-09-07"},{"h":"oval-boot-earrings-with-spheres","t":"Oval Boot Earrings with Spheres","p":27,"c":"Earrings","m":"18k Gold Plated","s":21,"d":"2026-03-08"},{"h":"croissant-ear-cuff","t":"Croissant Ear Cuff","p":24,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2025-09-08"},{"h":"heart-bracelet","t":"Heart Bracelet","p":28,"c":"Bracelets","m":"Sterling Silver 925","s":4,"d":"2025-03-24"},{"h":"fake-zirconia-piercing","t":"Fake Zirconia Piercing","p":21,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2026-03-07"},{"h":"square-hoop-duo-zirconia-earrings-l","t":"Square Hoop Duo Zirconia Earrings L","p":20,"c":"Earrings","m":"18k Gold Plated","s":19,"d":"2025-03-26"},{"h":"wavy-square-earrings","t":"Wavy Square Earrings","p":34,"c":"Earrings","m":"18k Gold Plated","s":11,"d":"2026-06-21"},{"h":"smooth-shell-pearl-earrings","t":"Smooth Shell Pearl Earrings","p":29,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-03-16"},{"h":"black-round-stud-earrings-small","t":"Black Round Stud Earrings Small","p":16,"c":"Earrings","m":"18k Gold Plated","s":11,"d":"2026-03-07"},{"h":"small-light-ear-hook-earrings","t":"Small Light Ear Hook Earrings","p":43,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2026-07-12"},{"h":"kids-sparkling-stud-earrings","t":"Kids’ Sparkling Stud Earrings","p":12,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2025-12-12"},{"h":"natural-stone-necklace","t":"natural stone necklace","p":76,"c":"Necklaces","m":"18k Gold Plated","s":19,"d":"2025-05-14"},{"h":"plain-sun-ring-with-zirconia","t":"Plain Sun Ring with Zirconia","p":24,"c":"Rings","m":"18k Gold Plated","s":20,"d":"2025-03-28"},{"h":"kids-pave-ballerina-silver-earrings","t":"Kids’ Pavé Ballerina Silver Earrings","p":43,"c":"Earrings","m":"Sterling Silver 925","s":14,"d":"2025-12-12"},{"h":"tucano-pave-ring","t":"Tucano Pavé Ring","p":45,"c":"Rings","m":"18k Gold Plated","s":7,"d":"2026-01-28"},{"h":"bubble-hoop-earrings","t":"Bubble Hoop Earrings","p":33,"c":"Earrings","m":"18k Gold Plated","s":23,"d":"2026-05-31"},{"h":"pave-infinity-slim-earrings","t":"Kids Pavé Infinity Slim Earrings","p":38,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2025-12-12"},{"h":"open-heart-silver-ring","t":"Open Heart Silver Ring","p":41,"c":"Rings","m":"Sterling Silver 925","s":23,"d":"2026-01-26"},{"h":"navy-blue-resin-bracelet-duo","t":"Navy Blue Resin Bracelet Duo","p":45,"c":"Bracelets","m":"18k Gold Plated","s":14,"d":"2026-03-10"},{"h":"smooth-triangle-earrings","t":"Smooth Triangle Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2026-03-07"},{"h":"clover-zirconia-hoop-earrings","t":"Clover Zirconia Hoop Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-03-08"},{"h":"mother-of-pearl-fe-faith-necklace-18k-gold-plated","t":"Mother of Pearl \"Fé\" (Faith) Necklace – 18k Gold Plated","p":36,"c":"Necklaces","m":"18k Gold Plated","s":10,"d":"2026-03-11"},{"h":"pink-quartz-teardrop-necklace-70-cm","t":"Pink Quartz Teardrop Necklace – 70 cm","p":65,"c":"Necklaces","m":"18k Gold Plated","s":11,"d":"2026-03-08"},{"h":"large-triangle-1","t":"Large Triangle","p":30,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2025-03-22"},{"h":"double-butterfly-colorful-earrings","t":"Butterfly Colorful Earrings","p":16,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2025-03-26"},{"h":"twist-ball-earrings","t":"Twist Ball Earrings","p":45,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-03-05"},{"h":"square-stone-silver-ring","t":"Square Stone Silver Ring","p":47,"c":"Rings","m":"Sterling Silver 925","s":17,"d":"2026-01-26"},{"h":"trio-band-zirconia-ring","t":"Trio Band Zirconia Ring","p":62,"c":"Rings","m":"18k Gold Plated","s":6,"d":"2026-06-21"},{"h":"white-gold-flower-earring","t":"White gold flower earring","p":64,"c":"Earrings","m":"White Gold Plated","s":19,"d":"2025-09-08"},{"h":"pearl-bracelet-set","t":"Pearl Bracelet","p":49,"c":"Bracelets","m":"18k Gold Plated","s":23,"d":"2026-04-26"},{"h":"butterfly-hoop-earrings","t":"Kids Butterfly Hoop Earrings","p":58,"c":"Earrings","m":"Sterling Silver 925","s":16,"d":"2025-12-12"},{"h":"synthetic-pearl-heart-bracelet","t":"Synthetic pearl heart bracelet","p":22,"c":"Bracelets","m":"18k Gold Plated","s":21,"d":"2025-09-08"},{"h":"circle-pin","t":"Circle Pin","p":14,"c":"Necklaces","m":"18k Gold Plated","s":22,"d":"2025-03-24"},{"h":"classic-shell-pearl-necklace-10mm","t":"Classic Shell Pearl Necklace (10mm)","p":69,"c":"Necklaces","m":"18k Gold Plated","s":4,"d":"2026-03-11"},{"h":"children-s-beaded-bracelet","t":"Children’s Beaded Bracelet","p":17,"c":"Bracelets","m":"18k Gold Plated","s":20,"d":"2025-12-15"},{"h":"star-shaped-clover-stud-earrings-with-pave-center-delicate-and-shiny","t":"Star-Shaped Clover Stud Earrings with Pave Center – Delicate and Shiny","p":35,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2025-06-30"},{"h":"yellow-faceted-zirconia-ball-necklace-3mm-38-7-cm","t":"Yellow Faceted Zirconia Ball Necklace Line – 3mm | 38 + 7 cm (No Pendant)","p":49,"c":"Necklaces","m":"18k Gold Plated","s":21,"d":"2026-03-08"},{"h":"pink-crystal-zirconia-four-strand-jewelry-set-40-7-cm","t":"Pink Crystal \u0026 Zirconia Four-Strand Jewelry Set – 40 + 7 cm","p":90,"c":"Sets","m":"18k Gold Plated","s":17,"d":"2026-03-10"},{"h":"necklace-and-drop-earring-set-with-zirconia","t":"Necklace and drop earring set with zirconia","p":56,"c":"Sets","m":"18k Gold Plated","s":12,"d":"2025-09-11"},{"h":"gobi-piercing-rhodium","t":"Gobi Piercing Rhodium","p":19,"c":"Earrings","m":"White Gold Plated","s":9,"d":"2026-07-12"},{"h":"children-s-colorful-ice-cream-jewelry-set","t":"Children’s Colorful Ice Cream Jewelry Set","p":57,"c":"Sets","m":"18k Gold Plated","s":26,"d":"2025-12-15"},{"h":"hearts-inspiration-set-with-mother-of-pearl-clover","t":"Hearts inspiration set with mother of pearl clover","p":120,"c":"Sets","m":"18k Gold Plated","s":27,"d":"2025-09-08"},{"h":"classic-ball-stud-earrings","t":"Classic Ball Stud Earrings","p":41,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-03-05"},{"h":"oval-zirconia-halo-ring","t":"Oval Zirconia Halo Ring","p":50,"c":"Rings","m":"18k Gold Plated","s":22,"d":"2026-03-06"},{"h":"pave-heart-necklace","t":"Pavé Heart Necklace","p":89,"c":"Necklaces","m":"18k Gold Plated","s":2,"d":"2026-03-05"},{"h":"pave-ring-with-large-bead","t":"Pavé Ring with Large Bead","p":54,"c":"Rings","m":"18k Gold Plated","s":11,"d":"2026-07-12"},{"h":"tourmaline-earrings","t":"Tourmaline Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-03-28"},{"h":"eloise-necklace","t":"Eloise Necklace","p":32,"c":"Necklaces","m":"18k Gold Plated","s":1,"d":"2026-07-12"},{"h":"small-thin-ring","t":"Small thin earring","p":10,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"bow-earrings","t":"Bow Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2026-06-21"},{"h":"inspired-necklace-with-zirconia-details","t":"Inspired necklace with zirconia details","p":70,"c":"Necklaces","m":"18k Gold Plated","s":2,"d":"2025-09-08"},{"h":"gold-circle-stud-earrings-with-pave-clover-delicate-and-elegant","t":"Gold Circle Stud Earrings with Pave Clover – Delicate and Elegant","p":32,"c":"Earrings","m":"18k Gold Plated","s":22,"d":"2025-06-30"},{"h":"pearl-flower-earrings","t":"Pearl Flower Earrings","p":26,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2026-03-08"},{"h":"delicate-shell-pearl-necklace-4mm","t":"Delicate Shell Pearl Necklace (4mm)","p":56,"c":"Necklaces","m":"18k Gold Plated","s":20,"d":"2026-03-11"},{"h":"pave-heart-hoop-earrings","t":"Pavé Heart Hoop Earrings","p":20,"c":"Earrings","m":"18k Gold Plated","s":16,"d":"2026-03-06"},{"h":"inspired-chunky-necklace","t":"Inspired Chunky Necklace","p":73,"c":"Necklaces","m":"18k Gold Plated","s":5,"d":"2026-03-06"},{"h":"zirconia-flower-ring","t":"Zirconia Flower Ring","p":19,"c":"Rings","m":"18k Gold Plated","s":4,"d":"2025-03-26"},{"h":"three-strand-rose-quartz-bracelet","t":"Three-Strand Rose Quartz Bracelet","p":41,"c":"Bracelets","m":"18k Gold Plated","s":3,"d":"2026-03-08"},{"h":"double-ring-with-pearl-ball-and-zirconia","t":"Double Ring with Pearl Ball and Zirconia","p":107,"c":"Rings","m":"18k Gold Plated","s":7,"d":"2026-06-21"},{"h":"smooth-silver-ribbon-bracelet","t":"Smooth Silver Ribbon Bracelet","p":77,"c":"Bracelets","m":"Sterling Silver 925","s":16,"d":"2026-01-26"},{"h":"smooth-teardrop-earrings","t":"Smooth Teardrop Earrings","p":46,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2026-03-08"},{"h":"heart-shaped-ring","t":"Heart-Shaped Ring","p":56,"c":"Rings","m":"18k Gold Plated","s":14,"d":"2025-03-23"},{"h":"closed-silver-hoop-earrings","t":"Closed Silver Hoop Earrings","p":47,"c":"Earrings","m":"Sterling Silver 925","s":9,"d":"2026-01-26"},{"h":"twist-ball-ring","t":"Twist Ball Ring","p":43,"c":"Rings","m":"18k Gold Plated","s":28,"d":"2026-03-05"},{"h":"medium-thin-ring","t":"Medium thin earring","p":13.3,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2025-09-08"},{"h":"brazil-mother-of-pearl-world-cup-bracelet","t":"Brazil Mother of Pearl World Cup Bracelet","p":40,"c":"Bracelets","m":"18k Gold Plated","s":2,"d":"2026-05-24"},{"h":"zirconia-bracelet","t":"Zirconia bracelet","p":50,"c":"Bracelets","m":"18k Gold Plated","s":11,"d":"2025-09-08"},{"h":"max-metal-heart-earrings-rhodium","t":"Max Metal Heart Earrings Rhodium","p":34,"c":"Earrings","m":"White Gold Plated","s":14,"d":"2026-06-21"},{"h":"shell-pearl-crystal-button-studs-18k-gold-plated","t":"Shell Pearl \u0026 Crystal Button Studs – 18k Gold Plated","p":26,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-03-11"},{"h":"kids-heart-earrings","t":"Kids’ Heart Earrings","p":12,"c":"Earrings","m":"18k Gold Plated","s":16,"d":"2025-12-12"},{"h":"three-silver-flower-earring","t":"Three silver flower earring","p":43,"c":"Earrings","m":"Sterling Silver 925","s":25,"d":"2025-09-08"},{"h":"silver-heart-necklace-amp-earrings-set-with-black-stone","t":"Silver Heart Necklace \u0026amp; Earrings Set with Black Stone","p":62,"c":"Sets","m":"Sterling Silver 925","s":16,"d":"2026-01-26"},{"h":"smooth-butterfly-necklace","t":"Smooth Butterfly Necklace","p":30,"c":"Necklaces","m":"18k Gold Plated","s":14,"d":"2026-07-12"},{"h":"smooth-butterfly-hoop-earrings","t":"Smooth Butterfly Hoop Earrings","p":17,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-07-12"},{"h":"crackle-crystal-torque-earring-set","t":"Crackle Crystal Torque \u0026 Earring Set","p":66,"c":"Sets","m":"18k Gold Plated","s":9,"d":"2026-03-11"},{"h":"kids-strawberry-earrings","t":"Kids’ Strawberry Earrings","p":12,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2025-12-12"},{"h":"open-teardrop","t":"Open Teardrop","p":22,"c":"Earrings","m":"Sterling Silver 925","s":11,"d":"2025-03-21"},{"h":"interlaced-silicone-crystal-bracelet","t":"Interlaced Silicone Crystal Bracelet","p":23,"c":"Bracelets","m":"18k Gold Plated","s":9,"d":"2026-03-08"},{"h":"pearl-earring-hanging-with-studded","t":"Pearl earring hanging with studded","p":66,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2025-09-08"},{"h":"paved-hoop-earring-m","t":"Paved Hoop Earring (M)","p":20,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2025-03-22"},{"h":"intertwined-double-band-ring-nbsp","t":"Intertwined Double Band Ring","p":28,"c":"Rings","m":"18k Gold Plated","s":1,"d":"2026-01-28"},{"h":"crystal-studded-pin","t":"Crystal-Studded Pin","p":22,"c":"Earrings","m":"Sterling Silver 925","s":21,"d":"2025-03-24"},{"h":"zirconia-heart-set","t":"Zirconia heart set","p":68.6,"c":"Sets","m":"18k Gold Plated","s":9,"d":"2025-09-08"},{"h":"necklace-number-2-white-bow","t":"Necklace number 2 White bow","p":44,"c":"Necklaces","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"candy-gourmet-chain-necklace","t":"Candy Gourmet Chain Necklace","p":67,"c":"Necklaces","m":"18k Gold Plated","s":19,"d":"2026-07-12"},{"h":"zirconia-ball-choker","t":"Zirconia Ball Choker","p":52,"c":"Necklaces","m":"18k Gold Plated","s":28,"d":"2025-09-08"},{"h":"square-zirconia-hoop-earrings","t":"Square Zirconia Hoop Earrings","p":61,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2026-03-10"},{"h":"square-zirconia-earrings","t":"Square Zirconia Earrings","p":18,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2026-03-06"},{"h":"oval-halo-zirconia-ring","t":"Oval Halo Zirconia Ring","p":38,"c":"Rings","m":"18k Gold Plated","s":20,"d":"2026-01-28"},{"h":"flower-earring-mixed-pearls-and-zirconia","t":"Flower earring mixed pearls and zirconia","p":56,"c":"Earrings","m":"18k Gold Plated","s":25,"d":"2025-09-08"},{"h":"red-organic-resin-earrings","t":"Red Organic Resin Earrings","p":25,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-03-10"},{"h":"hammered-rhodium-earrings","t":"Hammered Earrings","p":29,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2026-03-08"},{"h":"synthetic-pearl-clover-inspired-earring-small","t":"Small Synthetic pearl clover inspired earring","p":12,"c":"Earrings","m":"18k Gold Plated","s":16,"d":"2025-09-08"},{"h":"square-hoop-duo-zirconia-earrings-s","t":"Square Hoop Duo Zirconia Earrings S","p":15,"c":"Earrings","m":"White Gold Plated","s":7,"d":"2025-03-26"},{"h":"zirconia-inspired-bracelet-with-mother-of-pearl","t":"Zirconia inspired bracelet with mother of pearl","p":93,"c":"Bracelets","m":"18k Gold Plated","s":15,"d":"2025-09-08"},{"h":"silver-ballerina-earring","t":"Silver ballerina earring","p":43,"c":"Earrings","m":"Sterling Silver 925","s":20,"d":"2025-09-08"},{"h":"children-s-stud-earrings-sparkling-point-of-light","t":"Children’s Stud Earrings – Sparkling Point of Light","p":16,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2025-12-15"},{"h":"ellus-g-bracelet","t":"Ellus G Bracelet","p":49,"c":"Bracelets","m":"18k Gold Plated","s":17,"d":"2025-03-24"},{"h":"ring-studded-with-light-point-in-the-middle","t":"Ring studded with light point in the middle","p":26,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2025-09-08"},{"h":"candy-clover-earrings","t":"Candy Clover Earrings","p":20,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2026-07-12"},{"h":"radiant-zirconia-cross-necklace-18k-gold-plated","t":"Radiant Zirconia Cross Necklace – 18k Gold Plated","p":62,"c":"Necklaces","m":"18k Gold Plated","s":25,"d":"2026-03-11"},{"h":"golden-crystal-bracelet-69-3-5-cm","t":"Golden Crystal Bracelet – 69 + 3.5 cm","p":29,"c":"Bracelets","m":"18k Gold Plated","s":2,"d":"2026-03-08"},{"h":"twisted-trio-earring-g","t":"Twisted  Earring (L)","p":26,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2025-03-22"},{"h":"heart-necklace-with-synthetic-pearl","t":"Heart Necklace with Synthetic Pearl","p":28,"c":"Necklaces","m":"White Gold Plated","s":12,"d":"2025-03-24"},{"h":"pineapple-bracelet","t":"Pineapple Bracelet","p":34,"c":"Bracelets","m":"18k Gold Plated","s":12,"d":"2025-03-23"},{"h":"silver-clover-earrings","t":"Silver Clover Earrings","p":11,"c":"Earrings","m":"Sterling Silver 925","s":5,"d":"2026-01-26"},{"h":"elegant-zirconia-bracelet","t":"Elegant zirconia bracelet","p":107,"c":"Bracelets","m":"18k Gold Plated","s":27,"d":"2025-09-08"},{"h":"bow-base-zirconia-earrings","t":"Bow Base Zirconia Earrings","p":56,"c":"Earrings","m":"18k Gold Plated","s":25,"d":"2026-03-10"},{"h":"double-duo-ring","t":"Two-Tone Duo Ring","p":33,"c":"Rings","m":"18k Gold Plated","s":12,"d":"2025-03-26"},{"h":"braided-button-earrings","t":"Braided Button Earrings","p":30,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-06-21"},{"h":"thick-tube-hoop-earrings-medium","t":"Thick Tube Hoop Earrings Medium","p":30,"c":"Earrings","m":"18k Gold Plated","s":11,"d":"2026-03-05"},{"h":"max-organic-resin-earrings","t":"Max Organic Resin Earrings","p":54,"c":"Earrings","m":"18k Gold Plated","s":16,"d":"2026-06-21"},{"h":"solitaire-ring-with-sparkling-center-and-heart-details","t":"Solitaire Ring with Sparkling Center and Heart Details","p":43,"c":"Rings","m":"Sterling Silver 925","s":3,"d":"2026-01-26"},{"h":"matte-hoop-earrings","t":"Matte Hoop Earrings","p":35,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-03-16"},{"h":"white-bead-necklace","t":"White Bead Necklace","p":44,"c":"Necklaces","m":"18k Gold Plated","s":19,"d":"2026-04-26"},{"h":"hanging-three-star-earring","t":"Hanging three-star earring","p":26,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-09-08"},{"h":"necklace-number-1-colored-bow","t":"Necklace number 1 colored bow","p":44,"c":"Necklaces","m":"18k Gold Plated","s":22,"d":"2025-09-08"},{"h":"minimalist-jade-tone-oval-earrings-18k-gold-plated","t":"Minimalist Jade-Tone Oval Earrings – 18k Gold Plated","p":36,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2026-03-11"},{"h":"drop-click-hoop-earrings","t":"Drop Click Hoop Earrings","p":25,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2026-05-24"},{"h":"crystal-candle-earrings-with-zirconia","t":"Crystal Candle Earrings with Zirconia","p":25,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2026-06-21"},{"h":"thin-ribbon-necklace-1","t":"Thin Ribbon Necklace","p":68,"c":"Necklaces","m":"18k Gold Plated","s":14,"d":"2026-03-06"},{"h":"silver-ribbon-necklace-nbsp","t":"Silver Ribbon Necklace","p":141,"c":"Necklaces","m":"Sterling Silver 925","s":9,"d":"2026-01-26"},{"h":"lapis-lazuli-ball-earrings","t":"Lapis Lazuli Ball Earrings","p":42,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-06-21"},{"h":"zirconia-eternity-band","t":"Zirconia Eternity Band","p":48,"c":"Rings","m":"18k Gold Plated","s":1,"d":"2025-09-08"},{"h":"cat-eye-bracelet","t":"Cat Eye Bracelet","p":24,"c":"Bracelets","m":"18k Gold Plated","s":15,"d":"2026-03-10"},{"h":"gold-fake-piercing","t":"Gold Fake Piercing","p":18,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2026-03-08"},{"h":"yellow-square-solitaire-pave-ring","t":"Yellow Square Solitaire Pave Ring","p":54,"c":"Rings","m":"18k Gold Plated","s":10,"d":"2026-07-12"},{"h":"light-blue-riviera-necklace","t":"Riviera Necklace","p":158,"c":"Necklaces","m":"18k Gold Plated","s":1,"d":"2026-03-05"},{"h":"braided-silver-necklace","t":"Braided Silver Necklace","p":181,"c":"Necklaces","m":"Sterling Silver 925","s":5,"d":"2026-01-26"},{"h":"flower-pearl-necklace","t":"Flower \u0026 Pearl Necklace","p":43,"c":"Necklaces","m":"18k Gold Plated","s":13,"d":"2026-03-06"},{"h":"kids-butterfly-bracelet","t":"Kids Butterfly Bracelet","p":23,"c":"Bracelets","m":"18k Gold Plated","s":10,"d":"2026-07-12"},{"h":"large-white-ball-pave-ring","t":"Large White Ball Pavé Ring","p":57,"c":"Rings","m":"18k Gold Plated","s":9,"d":"2026-07-19"},{"h":"shell-pearl-biva-bracelet-16-5-cm","t":"Shell Pearl Biva Bracelet 16+5 cm","p":52,"c":"Bracelets","m":"18k Gold Plated","s":2,"d":"2026-03-16"},{"h":"large-shell-pearl-boot-earrings","t":"Large Shell Pearl Boot Earrings","p":32,"c":"Earrings","m":"18k Gold Plated","s":16,"d":"2026-03-10"},{"h":"brazil-map-crystal-necklace","t":"Brazil Map Crystal Necklace","p":55,"c":"Necklaces","m":"18k Gold Plated","s":9,"d":"2026-05-24"},{"h":"twisted-x-shaped-earrings-nbsp","t":"Twisted X-Shaped Earrings","p":52,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-04-26"},{"h":"gold-spiral-earrings","t":"Gold Spiral Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2026-06-21"},{"h":"engraved-pearl-earring","t":"Engraved pearl earring","p":42,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2025-09-08"},{"h":"black-onyx-style-oval-stud-earrings-18k-gold-plated","t":"Black Onyx Style Oval Stud Earrings – 18k Gold Plated","p":23,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2026-03-11"},{"h":"large-synthetic-pearl-clover-inspired-earring","t":"Large synthetic pearl clover inspired earring","p":16,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-09-08"},{"h":"luxury-heart-zirconia-ring","t":"Luxury Heart Zirconia Ring","p":64,"c":"Rings","m":"18k Gold Plated","s":21,"d":"2026-03-06"},{"h":"colorful-clip-on-earrings-nbsp","t":"Colorful Clip-On Earrings","p":67,"c":"Earrings","m":"18k Gold Plated","s":15,"d":"2026-04-26"},{"h":"children-s-cat-jewelry-set-with-bow-and-zirconia","t":"Children’s Cat Jewelry Set with Bow and Zirconia","p":60,"c":"Sets","m":"18k Gold Plated","s":13,"d":"2025-12-15"},{"h":"open-heart-ring","t":"Open Heart Ring","p":25,"c":"Rings","m":"18k Gold Plated","s":20,"d":"2026-01-28"},{"h":"thick-band-ring","t":"Thick Band Ring","p":35,"c":"Rings","m":"18k Gold Plated","s":13,"d":"2026-03-06"},{"h":"shell-pearl-ball-bracelet-10-mm-15-5-cm","t":"Shell Pearl Ball Bracelet – 10 mm | 15 + 5 cm","p":36,"c":"Bracelets","m":"18k Gold Plated","s":10,"d":"2026-03-10"},{"h":"half-eternity-white-zirconia-ring","t":"Half Eternity White Zirconia Ring","p":23,"c":"Rings","m":"18k Gold Plated","s":28,"d":"2025-03-26"},{"h":"delicate-beaded-necklace","t":"Delicate Beaded Necklace","p":21,"c":"Necklaces","m":"18k Gold Plated","s":23,"d":"2026-03-06"},{"h":"single-stone-hoop-earrings","t":"Kids Single-Stone Hoop Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2025-12-12"},{"h":"mother-heart-necklace","t":"mother heart necklace","p":42,"c":"Necklaces","m":"18k Gold Plated","s":8,"d":"2025-05-13"},{"h":"pave-round-earrings-with-hollow-x","t":"Pavé Round Earrings with Hollow “X”","p":52,"c":"Earrings","m":"18k Gold Plated","s":28,"d":"2026-04-26"},{"h":"organic-shape-hoop-earrings","t":"Organic Shape Hoop Earrings","p":120,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2026-03-05"},{"h":"turquoise-resin-earrings","t":"Turquoise Resin Earrings","p":32,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2026-03-10"},{"h":"ruby-heart-bracelet-duo","t":"Ruby Heart Bracelet Duo","p":18,"c":"Bracelets","m":"18k Gold Plated","s":8,"d":"2026-03-10"},{"h":"boy-pendant","t":"boy pendant","p":23,"c":"Necklaces","m":"18k Gold Plated","s":22,"d":"2025-05-13"},{"h":"croissant-hoop-earrings","t":"Croissant Hoop Earrings","p":26,"c":"Earrings","m":"18k Gold Plated","s":22,"d":"2025-09-08"},{"h":"heart-pearl-necklace","t":"Heart Pearl Necklace","p":43,"c":"Necklaces","m":"18k Gold Plated","s":2,"d":"2026-07-12"},{"h":"hoop-earrings-with-crystal-paved-nbsp-dice-charm-bold-and-stylish","t":"Hoop Earrings with Crystal-Paved  Dice Charm – Bold and Stylish","p":52,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-06-30"},{"h":"gold-drop-earrings","t":"Gold Drop Earrings","p":29,"c":"Earrings","m":"18k Gold Plated","s":17,"d":"2026-05-31"},{"h":"comma-earrings","t":"Comma Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":6,"d":"2026-03-08"},{"h":"detailed-pave-silver-earrings-nbsp","t":"Detailed Pavé Silver Earrings","p":45,"c":"Earrings","m":"Sterling Silver 925","s":12,"d":"2026-01-26"},{"h":"open-heart-ring-1","t":"Open Heart Ring","p":22,"c":"Rings","m":"18k Gold Plated","s":25,"d":"2026-01-28"},{"h":"rhodium-crystal-zirconia-piercing","t":"Rhodium Crystal Zirconia Piercing","p":23,"c":"Earrings","m":"White Gold Plated","s":22,"d":"2026-03-16"},{"h":"faceted-crystal-color-zirconia-necklace-bracelet-36-3-5cm","t":"Faceted Crystal / Color  Zirconia Necklace \u0026 Bracelet 36+3.5cm","p":54,"c":"Necklaces","m":"18k Gold Plated","s":20,"d":"2026-03-08"},{"h":"red-marble-resin-bangle-earring-set","t":"Orange Marble Resin Bangle","p":28,"c":"Bracelets","m":"18k Gold Plated","s":27,"d":"2026-03-11"},{"h":"pearl-heart-bracelet-solarie","t":"Pearl Heart Bracelet Solarie","p":23,"c":"Bracelets","m":"18k Gold Plated","s":8,"d":"2026-07-12"},{"h":"candy-pop-necklace-kids","t":"Candy Pop Necklace kids","p":56,"c":"Necklaces","m":"18k Gold Plated","s":18,"d":"2026-07-12"},{"h":"large-pearl-bracelet-with-zirconia","t":"Large pearl bracelet with zirconia","p":86,"c":"Bracelets","m":"18k Gold Plated","s":24,"d":"2025-09-08"},{"h":"engraved-band-with-stone","t":"Engraved Band with Stone","p":42,"c":"Rings","m":"18k Gold Plated","s":2,"d":"2025-09-08"},{"h":"heart-zirconia-earring","t":"heart zirconia earring","p":35,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2025-05-14"},{"h":"shell-pearl-gold-bead-layering-necklace-18k-gold-plated","t":"Shell Pearl Necklace (2mm)","p":68,"c":"Necklaces","m":"18k Gold Plated","s":8,"d":"2026-03-11"},{"h":"geometric-burgundy-resin-rectangle-earrings-18k-gold-plated","t":"Geometric Burgundy Resin Rectangle Earrings – 18k Gold Plated","p":16,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2026-03-11"},{"h":"pearl-inspiration-bracelet-with-zirconia","t":"Pearl inspiration bracelet with zirconia","p":98,"c":"Bracelets","m":"18k Gold Plated","s":16,"d":"2025-09-11"},{"h":"silver-teardrop-light-point-necklace","t":"Silver Teardrop Light Point Necklace","p":47,"c":"Necklaces","m":"Sterling Silver 925","s":3,"d":"2026-01-26"},{"h":"dark-resin-drop-earrings","t":"Dark Resin Drop Earrings","p":14,"c":"Earrings","m":"18k Gold Plated","s":19,"d":"2025-03-26"},{"h":"candy-bow-earrings-kids","t":"Candy Bow Earrings kids","p":20,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-07-12"},{"h":"natural-stone-set-with-zirconia","t":"Natural stone set with zirconia","p":56,"c":"Sets","m":"18k Gold Plated","s":17,"d":"2025-09-08"},{"h":"three-piece-pave-set-ring","t":"Pave Ring","p":28,"c":"Rings","m":"18k Gold Plated","s":26,"d":"2025-03-23"},{"h":"children-s-pearl-jewelry-set","t":"Children’s Pearl Jewelry Set","p":75,"c":"Sets","m":"18k Gold Plated","s":4,"d":"2025-12-15"},{"h":"oval-solitaire-ring","t":"Oval Solitaire Ring","p":32,"c":"Rings","m":"18k Gold Plated","s":24,"d":"2025-03-26"},{"h":"thin-smooth-silver-ring-1","t":"Thin Smooth Silver Ring","p":62,"c":"Rings","m":"Sterling Silver 925","s":14,"d":"2026-01-26"},{"h":"stick-hanging-hearts","t":"Stick hanging hearts","p":44,"c":"Necklaces","m":"18k Gold Plated","s":10,"d":"2025-09-08"},{"h":"medium-studded-earring","t":"Medium studded earring","p":28,"c":"Earrings","m":"18k Gold Plated","s":18,"d":"2025-09-08"},{"h":"zirconia-heart-pinky-ring","t":"Zirconia Heart Pinky Ring","p":40,"c":"Rings","m":"18k Gold Plated","s":22,"d":"2026-06-21"},{"h":"matte-thin-trio-hoop-earring-l","t":"Matte Thin Hoop Earring (L)","p":32,"c":"Earrings","m":"18k Gold Plated","s":8,"d":"2025-03-21"},{"h":"studded-amor-love-bracelet","t":"Studded ( amor ) love bracelet","p":44,"c":"Earrings","m":"18k Gold Plated","s":10,"d":"2025-09-08"},{"h":"necklace-with-1-child","t":"necklace with 1 child","p":43,"c":"Necklaces","m":"18k Gold Plated","s":12,"d":"2025-05-13"},{"h":"black-clover-inspiration-set","t":"Black clover inspiration set","p":74,"c":"Sets","m":"18k Gold Plated","s":27,"d":"2025-09-08"},{"h":"fully-paved-ring","t":"Fully Paved Ring","p":48,"c":"Rings","m":"Sterling Silver 925","s":7,"d":"2025-03-23"},{"h":"braided-silver-ribbon-bracelet","t":"Braided Silver Ribbon Bracelet","p":149,"c":"Bracelets","m":"Sterling Silver 925","s":6,"d":"2026-01-26"},{"h":"hoop-earring-with-zirconia-pebbles","t":"Hoop earring with zirconia pebbles","p":18,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2025-09-08"},{"h":"dangling-silver-light-point-earrings","t":"Dangling Silver Light Point Earrings","p":23,"c":"Earrings","m":"Sterling Silver 925","s":18,"d":"2026-01-26"},{"h":"pearl-shell-pendant-necklace-45-cm","t":"Pearl Shell Pendant Necklace – 45 cm","p":39,"c":"Necklaces","m":"18k Gold Plated","s":27,"d":"2026-03-08"},{"h":"white-inspiration-earring","t":"Lucky Clover Earrings","p":16,"c":"Earrings","m":"18k Gold Plated","s":24,"d":"2025-09-08"},{"h":"black-tiger-eye-bead-earrings","t":"Black Tiger Eye Bead Earrings","p":40,"c":"Earrings","m":"18k Gold Plated","s":15,"d":"2026-03-16"},{"h":"candypop-bracelets-solarie","t":"CandyPop Bracelets Solarie","p":23,"c":"Bracelets","m":"18k Gold Plated","s":14,"d":"2026-07-12"},{"h":"children-s-pearl-jewelry-set-with-heart-pendant","t":"Children’s Pearl Jewelry Set with Heart Pendant","p":68,"c":"Sets","m":"18k Gold Plated","s":22,"d":"2025-12-15"},{"h":"pearl-shell-bracelet-19-cm","t":"Pearl Shell Bracelet – 19 cm","p":54,"c":"Bracelets","m":"18k Gold Plated","s":26,"d":"2026-03-08"},{"h":"blue-butterfly-jewelry-set","t":"Blue Butterfly Jewelry Set","p":60,"c":"Sets","m":"18k Gold Plated","s":2,"d":"2025-12-15"},{"h":"mini-pave-hoop-earrings-with-pearl-drop","t":"Mini Pavé Hoop Earrings with Pearl Drop","p":30,"c":"Earrings","m":"18k Gold Plated","s":21,"d":"2026-03-06"},{"h":"ocean-inspired-necklace","t":"Ocean Inspired Necklace","p":89,"c":"Necklaces","m":"18k Gold Plated","s":21,"d":"2026-04-26"},{"h":"pearl-mother-of-pearl-clover-inspired-earring-with-zirconia","t":"Pearl mother of pearl clover inspired earring with zirconia","p":57,"c":"Earrings","m":"18k Gold Plated","s":26,"d":"2025-09-08"},{"h":"sea-star-ocean-bracelet","t":"Sea Star Ocean Bracelet","p":47,"c":"Bracelets","m":"18k Gold Plated","s":13,"d":"2026-04-26"},{"h":"slim-flower-ring-with-blue-and-pink-zirconia","t":"Slim Flower Ring with Blue and Pink Zirconia","p":28,"c":"Rings","m":"18k Gold Plated","s":6,"d":"2026-01-29"},{"h":"red-heart-earring-necklace-set","t":"Red Heart Earring \u0026 Necklace Set","p":73,"c":"Sets","m":"18k Gold Plated","s":24,"d":"2026-04-26"},{"h":"long-fringe-necklace","t":"Long Fringe Necklace","p":53,"c":"Necklaces","m":"18k Gold Plated","s":4,"d":"2026-04-26"},{"h":"clover-amp-lv-bracelet-and-ring-set","t":"Clover LV Bracelet and Ring Set","p":127,"c":"Sets","m":"18k Gold Plated","s":5,"d":"2026-04-26"},{"h":"medium-hoop","t":"Medium Hoop","p":16,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2025-03-21"},{"h":"striped-square-earrings","t":"Striped Square Earrings","p":27,"c":"Earrings","m":"18k Gold Plated","s":14,"d":"2026-03-07"},{"h":"gourmet-candy-bracelet-solarie","t":"Gourmet Candy Bracelet Solarie","p":26,"c":"Bracelets","m":"18k Gold Plated","s":3,"d":"2026-07-12"},{"h":"twisted-hoop-ball-earrings","t":"Twisted Hoop Ball Earrings","p":59,"c":"Earrings","m":"18k Gold Plated","s":19,"d":"2026-03-08"},{"h":"big-circle-earring","t":"Big circle earring","p":48,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"mother-of-pearl-star-earrings","t":"Mother of Pearl Star Earrings","p":40,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2026-06-21"},{"h":"twisted-hoop-earrings-small","t":"Twisted Hoop Earrings Small","p":22,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2026-03-05"},{"h":"trio-ball-duo-ring","t":"Trio Ball Duo Ring","p":53,"c":"Rings","m":"18k Gold Plated","s":2,"d":"2025-03-26"},{"h":"shell-pearl-earring-with-chains","t":"Shell Pearl Earring with Chains","p":44,"c":"Earrings","m":"18k Gold Plated","s":18,"d":"2025-03-22"},{"h":"shell-pearl-ear-cuff-earrings","t":"Shell Pearl Ear Cuff Earrings","p":42,"c":"Earrings","m":"18k Gold Plated","s":2,"d":"2026-06-21"},{"h":"crystal-zirconia-cross-necklace-42-3cm","t":"Crystal Zirconia Cross Necklace 42+3cm","p":115,"c":"Necklaces","m":"18k Gold Plated","s":20,"d":"2026-06-21"},{"h":"ball-hoop-earrings-1","t":"Ball Hoop Earrings","p":44,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2026-06-21"},{"h":"smooth-triangle-earrings-with-zirconia","t":"Smooth Triangle Earrings with Zirconia","p":36,"c":"Earrings","m":"18k Gold Plated","s":17,"d":"2026-06-21"},{"h":"zirconia-square-earring","t":"Zirconia square earring","p":16,"c":"Earrings","m":"18k Gold Plated","s":1,"d":"2025-09-08"},{"h":"pearl-shell-earrings","t":"Pearl Shell Earrings","p":28,"c":"Earrings","m":"18k Gold Plated","s":12,"d":"2026-03-08"},{"h":"snake-necklace","t":"Snake necklace","p":39.2,"c":"Necklaces","m":"18k Gold Plated","s":22,"d":"2025-09-08"},{"h":"ball-hoop-earrings","t":"Ball Hoop Earrings","p":38,"c":"Earrings","m":"18k Gold Plated","s":5,"d":"2026-03-06"},{"h":"green-resin-jewelry-set-necklace-earrings","t":"Green Resin Jewelry Set – Necklace \u0026 Earrings","p":90,"c":"Sets","m":"18k Gold Plated","s":4,"d":"2026-03-10"},{"h":"pave-heart-earrings","t":"Pavé Heart Earrings","p":38,"c":"Earrings","m":"18k Gold Plated","s":3,"d":"2026-03-05"},{"h":"paris-hoop-earring","t":"Paris Hoop Earring","p":38,"c":"Earrings","m":"18k Gold Plated","s":18,"d":"2025-09-08"},{"h":"kids-style-ring","t":"Kids Style Ring","p":26,"c":"Rings","m":"18k Gold Plated","s":17,"d":"2026-07-12"},{"h":"rhodium-flame-earrings","t":"Rhodium Flame Earrings","p":40,"c":"Earrings","m":"White Gold Plated","s":13,"d":"2026-07-12"},{"h":"silver-solitaire-ring","t":"Silver Solitaire Ring","p":33,"c":"Rings","m":"Sterling Silver 925","s":27,"d":"2026-01-26"},{"h":"children-s-pearl-and-gold-bead-bracelet","t":"Children’s Pearl and Gold Bead Bracelet","p":15,"c":"Bracelets","m":"18k Gold Plated","s":5,"d":"2025-12-15"},{"h":"children-s-dog-jewelry-set-with-zirconia","t":"Children’s Dog Jewelry Set with Zirconia","p":60,"c":"Sets","m":"18k Gold Plated","s":27,"d":"2025-12-15"},{"h":"halo-zirconia-ring","t":"Halo Zirconia Ring","p":26,"c":"Rings","m":"White Gold Plated","s":9,"d":"2025-03-23"},{"h":"ball-chain-bracelet-15-5cm","t":"Ball Chain Bracelet 15+5cm","p":23,"c":"Necklaces","m":"18k Gold Plated","s":24,"d":"2026-06-21"},{"h":"sample-trio-heart-earring","t":"Heart Earring","p":6,"c":"Earrings","m":"18k Gold Plated","s":19,"d":"2025-03-21"},{"h":"pink-zirconia-hoop-trio-earrings","t":"Pink Zirconia Hoop Trio Earrings","p":81,"c":"Earrings","m":"18k Gold Plated","s":4,"d":"2026-06-21"},{"h":"shell-pearl-ball-necklace-40-5-cm","t":"Shell Pearl Ball Necklace – 40 + 5 cm","p":68,"c":"Necklaces","m":"18k Gold Plated","s":6,"d":"2026-03-10"},{"h":"silver-butterfly-necklace-earrings-set","t":"Silver Butterfly Necklace; Earrings Set","p":62,"c":"Sets","m":"Sterling Silver 925","s":24,"d":"2026-01-26"},{"h":"earring-three-options","t":"Earring three options","p":16,"c":"Earrings","m":"18k Gold Plated","s":9,"d":"2025-09-08"},{"h":"three-row-zirconia-ring-with-stone-in-the-middle","t":"Three-row zirconia ring with stone in the middle","p":48,"c":"Rings","m":"18k Gold Plated","s":28,"d":"2025-09-08"},{"h":"heart-pin","t":"Heart Pin","p":14,"c":"Necklaces","m":"Sterling Silver 925","s":27,"d":"2025-03-24"},{"h":"zirconia-mother-necklace","t":"zirconia mother necklace","p":22,"c":"Necklaces","m":"18k Gold Plated","s":27,"d":"2025-05-13"},{"h":"hanging-earring-inspired-by-lv","t":"Hanging earring inspired by LV","p":43,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2025-09-08"},{"h":"heart-set-with-zirconia-around","t":"Heart set with zirconia around","p":48,"c":"Sets","m":"18k Gold Plated","s":22,"d":"2025-09-11"},{"h":"luxury-ball-earring","t":"Luxury ball earring","p":35,"c":"Earrings","m":"18k Gold Plated","s":13,"d":"2025-09-08"},{"h":"tube-hoop-earrings","t":"Tube Hoop Earrings (gold and white gold)","p":21,"c":"Earrings","m":"White Gold Plated","s":11,"d":"2025-03-28"},{"h":"midnight-azure-double-wrap-resin-cuff","t":"Midnight Azure Double-Wrap Resin Cuff","p":45,"c":"Bracelets","m":"18k Gold Plated","s":4,"d":"2026-03-16"},{"h":"inspired-clover-pearl-pave-earrings","t":"Inspired Clover Pearl \u0026 Pavé Earrings","p":21,"c":"Earrings","m":"18k Gold Plated","s":20,"d":"2026-03-06"},{"h":"heart-candy-hoop-earrings","t":"Heart Candy Hoop Earrings","p":20,"c":"Earrings","m":"18k Gold Plated","s":27,"d":"2026-07-12"},{"h":"modern-gold-plated-torque-necklace","t":"Modern Gold-Plated Torque Necklace","p":76,"c":"Necklaces","m":"18k Gold Plated","s":15,"d":"2026-03-11"},{"h":"tiger-eye-natural-stone-earrings-square-base","t":"Tiger Eye Natural Stone Earrings – Square Base","p":38,"c":"Earrings","m":"18k Gold Plated","s":7,"d":"2026-03-11"},{"h":"resin-coral-necklace","t":"Coral Necklace","p":119,"c":"Necklaces","m":"18k Gold Plated","s":27,"d":"2026-04-26"},{"h":"multicolor-zirconia-silver-ring","t":"Multicolor Zirconia Silver Ring","p":39,"c":"Rings","m":"Sterling Silver 925","s":21,"d":"2026-01-26"},{"h":"heart-necklace-with-zirconia-and-portuguese-link","t":"Heart Necklace with Zirconia and Portuguese Link","p":76,"c":"Necklaces","m":"18k Gold Plated","s":24,"d":"2025-03-24"},{"h":"soccer-ball-necklace","t":"Soccer Ball Necklace","p":80,"c":"Necklaces","m":"18k Gold Plated","s":4,"d":"2026-05-24"},{"h":"vibrant-pink-resin-disc-earrings","t":"Vibrant Pink Resin Disc Earrings","p":22,"c":"Earrings","m":"18k Gold Plated","s":23,"d":"2026-03-11"}];
+
+/* ---------- utilidades ---------- */
+const HOJE = new Date(2026,7,25);           // 25/08/2026, base do protótipo
+const DIA  = 86400000;
+const brl  = n => "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const int  = n => n.toLocaleString("pt-BR");
+const dstr = d => d.toISOString().slice(0,10);
+const dbr  = d => d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+
+/* PRNG determinístico — mesmo produto gera sempre a mesma história */
+function seed(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(s){let x=s;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296}}
+
+/* ---------- simulação de 200 dias de pedidos ---------- */
+const DIAS = 200;
+const vendas = [];   // [{i, dia, qtd}]
+CAT.forEach((p,i)=>{
+  const r = rng(seed(p.h));
+  // peças baratas giram mais; algumas simplesmente não giram
+  const base = Math.max(0, (60/(p.p+18)) * (0.25 + r()*1.5) - 0.35);
+  const morta = r() < 0.17;                       // ~17% do catálogo parado
+  const taxa = morta ? base*0.012 : base;
+  for(let d=0; d<DIAS; d++){
+    const fim = ((d%7===5)||(d%7===6)) ? 1.35 : 1;  // fim de semana vende mais
+    const tend = 1 + (d/DIAS)*0.45;                 // leve crescimento
+    const lam = taxa*fim*tend*0.5;
+    let q=0; if(r()<lam) q = 1 + (r()<0.22?1:0);
+    if(q) vendas.push({i, dia:d, qtd:q});
+  }
+});
+const diaData = d => new Date(HOJE.getTime() - (DIAS-1-d)*DIA);
+
+/* ---------- estado ---------- */
+let periodo = 30;
+const MARGENS = {Earrings:65, Necklaces:62, Rings:60, Bracelets:63, Sets:58};
+
+function janela(){
+  if(periodo==="cus"){
+    const a=document.getElementById("d1").value, b=document.getElementById("d2").value;
+    if(!a||!b) return [DIAS-30, DIAS-1];
+    const ia = Math.round((new Date(a+"T00:00:00")-diaData(0))/DIA);
+    const ib = Math.round((new Date(b+"T00:00:00")-diaData(0))/DIA);
+    return [Math.max(0,Math.min(ia,ib)), Math.min(DIAS-1,Math.max(ia,ib))];
+  }
+  const n = periodo===0 ? 1 : periodo;
+  return [DIAS-n, DIAS-1];
+}
+
+function agrega(){
+  const [a,b] = janela();
+  const dur = b-a+1;
+  const porProduto = new Array(CAT.length).fill(0);
+  const porDia = new Array(dur).fill(0);
+  const undDia = new Array(dur).fill(0);
+  let receita=0, unidades=0, pedidos=0;
+
+  for(const v of vendas){
+    if(v.dia<a||v.dia>b) continue;
+    const p = CAT[v.i], val = p.p*v.qtd;
+    porProduto[v.i]+=v.qtd; porDia[v.dia-a]+=val; undDia[v.dia-a]+=v.qtd;
+    receita+=val; unidades+=v.qtd; pedidos++;
+  }
+  // período anterior, de mesmo tamanho, para comparação
+  let recAnt=0;
+  for(const v of vendas){ if(v.dia>=a-dur && v.dia<a) recAnt += CAT[v.i].p*v.qtd; }
+
+  return {a,b,dur,porProduto,porDia,undDia,receita,unidades,pedidos,recAnt};
+}
+
+/* ---------- render ---------- */
+function kpis(g){
+  const ticket = g.pedidos? g.receita/g.pedidos : 0;
+  const delta = g.recAnt>0 ? ((g.receita-g.recAnt)/g.recAnt*100) : null;
+  let lucro=0;
+  g.porProduto.forEach((q,i)=>{ if(q) lucro += CAT[i].p*q*((MARGENS[CAT[i].c]??60)/100); });
+
+  const cards = [
+    ["Receita", brl(g.receita), delta===null? "sem base anterior" :
+      (delta>=0? "▲ "+delta.toFixed(1)+"% vs período anterior" : "▼ "+Math.abs(delta).toFixed(1)+"% vs período anterior"),
+      delta===null? "" : (delta>=0?"up":"dn")],
+    ["Pedidos", int(g.pedidos), int(g.unidades)+" peças vendidas", ""],
+    ["Ticket médio", brl(ticket), "por pedido", ""],
+    ["Lucro estimado", brl(lucro), "pela margem informada", ""]
+  ];
+  document.getElementById("kpis").innerHTML = cards.map(c=>
+    `<div class="kpi"><div class="kpi-k">${c[0]}</div><div class="kpi-v">${c[1]}</div>
+     <div class="kpi-d ${c[3]}">${c[2]}</div></div>`).join("");
+}
+
+function linha(g){
+  const svg=document.getElementById("line");
+  // 1 unidade do viewBox = 1 pixel real, senao o texto dos eixos encolhe
+  // junto com o SVG e fica ilegivel no celular.
+  const W=Math.max(300, Math.round(document.getElementById("cw").clientWidth));
+  const estreito = W<520;
+  const H=estreito?210:260, ml=estreito?40:52, mr=14, mt=14, mb=30;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("height",H);
+  const n=g.porDia.length, max=Math.max(1,...g.porDia);
+  const x=i=> ml + (n<=1? (W-ml-mr)/2 : i*(W-ml-mr)/(n-1));
+  const y=v=> mt + (H-mt-mb) * (1 - v/max);
+  let s='';
+  // grade + eixo Y
+  for(let k=0;k<=4;k++){
+    const v=max*k/4, yy=y(v);
+    s+=`<line class="gl" x1="${ml}" y1="${yy.toFixed(1)}" x2="${W-mr}" y2="${yy.toFixed(1)}"/>`;
+    s+=`<text x="${ml-8}" y="${(yy+3.5).toFixed(1)}" text-anchor="end">${v>=1000?(v/1000).toFixed(1)+"k":Math.round(v)}</text>`;
+  }
+  // área + linha
+  const pts=g.porDia.map((v,i)=>[x(i),y(v)]);
+  const d="M"+pts.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" L ");
+  s+=`<path d="${d} L ${x(n-1).toFixed(1)} ${y(0)} L ${x(0).toFixed(1)} ${y(0)} Z" fill="var(--accent)" opacity=".13"/>`;
+  s+=`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  // rótulos X
+  const step=Math.max(1,Math.ceil(n/(estreito?4:7)));
+  for(let i=0;i<n;i+=step) s+=`<text x="${x(i).toFixed(1)}" y="${H-9}" text-anchor="middle">${dbr(diaData(g.a+i))}</text>`;
+  // ponto final destacado
+  s+=`<circle cx="${x(n-1).toFixed(1)}" cy="${y(g.porDia[n-1]).toFixed(1)}" r="4" fill="var(--accent)" stroke="var(--card)" stroke-width="2"/>`;
+  s+=`<line id="cross" x1="0" y1="${mt}" x2="0" y2="${H-mb}" stroke="var(--ink-3)" stroke-width="1" opacity="0"/>`;
+  svg.innerHTML=`<g class="axis">${s}</g>`;
+
+  // hover
+  const wrap=document.getElementById("cw"), tip=document.getElementById("tip"), cross=svg.querySelector("#cross");
+  function move(ev){
+    const r=svg.getBoundingClientRect();
+    const px=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+    const sx=px*W/r.width;
+    let i=Math.round((sx-ml)/((W-ml-mr)/Math.max(1,n-1)));
+    i=Math.max(0,Math.min(n-1,i));
+    cross.setAttribute("x1",x(i)); cross.setAttribute("x2",x(i)); cross.setAttribute("opacity",".45");
+    tip.style.opacity=1;
+    tip.innerHTML=`<b>${diaData(g.a+i).toLocaleDateString("pt-BR",{day:"2-digit",month:"short"})}</b>
+      ${brl(g.porDia[i])} · ${g.undDia[i]} peça${g.undDia[i]===1?"":"s"}`;
+    const left=x(i)*r.width/W;
+    tip.style.left=Math.min(Math.max(6,left-tip.offsetWidth/2), r.width-tip.offsetWidth-6)+"px";
+    tip.style.top="6px";
+  }
+  wrap.onmousemove=move; wrap.ontouchmove=e=>{move(e);e.preventDefault()};
+  wrap.onmouseleave=()=>{tip.style.opacity=0;cross.setAttribute("opacity","0")};
+}
+
+function barras(el, itens, fmt, escala){
+  // escala explicita mantem "mais vendidos" e "menos vendidos" na MESMA regua —
+  // sem isso, oito produtos de 1 unidade virariam oito barras cheias.
+  const max=Math.max(1, escala ?? Math.max(...itens.map(i=>i.v)));
+  el.innerHTML = itens.length? itens.map(i=>`
+    <div class="bar-row">
+      <div><div class="bar-lab" title="${i.t}">${i.t}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max(2,i.v/max*100).toFixed(1)}%"></div></div></div>
+      <div class="bar-val">${fmt(i.v)}</div>
+    </div>`).join("") : `<div class="empty">Nada no período.</div>`;
+}
+
+function tabelas(g){
+  const dur=g.dur;
+  const linhas = CAT.map((p,i)=>{
+    const q=g.porProduto[i], porDia=q/dur;
+    const dias = porDia>0 ? p.s/porDia : Infinity;
+    return {p,q,porDia,dias,i};
+  });
+
+  /* --- repor --- */
+  const rep = linhas.filter(l=>l.q>0 && l.dias<30).sort((a,b)=>a.dias-b.dias).slice(0,10);
+  document.getElementById("repor").innerHTML =
+    `<thead><tr><th>Peça</th><th class="n">Em estoque</th><th class="n">Vendas no período</th>
+     <th class="n">Acaba em</th><th>Situação</th></tr></thead><tbody>` +
+    (rep.length? rep.map(l=>{
+      const crit=l.dias<10;
+      return `<tr><td><div class="pname">${l.p.t}</div><div class="psub">${l.p.c}</div></td>
+      <td class="n">${l.p.s}</td><td class="n">${l.q}</td>
+      <td class="n">${l.dias<1?"menos de 1 dia":Math.round(l.dias)+" dias"}</td>
+      <td><span class="pill ${crit?"crit":"act"}"><i>${crit?"▲":"●"}</i>${crit?"Comprar agora":"Programar compra"}</span></td></tr>`;
+    }).join("") : `<tr><td colspan="5" class="empty">Nenhuma peça em risco de acabar neste período.</td></tr>`)
+    + `</tbody>`;
+
+  /* --- parados --- */
+  const par = linhas.filter(l=>l.q===0 && l.p.s>0).sort((a,b)=>b.p.s*b.p.p - a.p.s*a.p.p);
+  const capital = par.reduce((s,l)=>s+l.p.s*l.p.p,0);
+  document.getElementById("paradosum").innerHTML =
+    `<b>${par.length} peças</b> não venderam nenhuma unidade neste período, somando
+     <b>${brl(capital)}</b> de estoque parado a preço de venda.`;
+  document.getElementById("parados").innerHTML =
+    `<thead><tr><th>Peça</th><th class="n">Em estoque</th><th class="n">Preço</th>
+     <th class="n">Parado</th><th>Situação</th></tr></thead><tbody>` +
+    (par.length? par.slice(0,10).map(l=>`
+      <tr><td><div class="pname">${l.p.t}</div><div class="psub">${l.p.c}</div></td>
+      <td class="n">${l.p.s}</td><td class="n">${brl(l.p.p)}</td>
+      <td class="n">${brl(l.p.s*l.p.p)}</td>
+      <td><span class="pill crit"><i>■</i>Sem venda</span></td></tr>`).join("")
+      : `<tr><td colspan="5" class="empty">Tudo girou no período.</td></tr>`)
+    + `</tbody>`;
+
+  /* --- lucro --- */
+  const luc = linhas.filter(l=>l.q>0).map(l=>{
+    const mg=(MARGENS[l.p.c]??60)/100;
+    return {...l, rec:l.p.p*l.q, lucro:l.p.p*l.q*mg, mg};
+  }).sort((a,b)=>b.lucro-a.lucro).slice(0,10);
+  document.getElementById("lucro").innerHTML =
+    `<thead><tr><th>Peça</th><th class="n">Vendidas</th><th class="n">Faturamento</th>
+     <th class="n">Margem</th><th class="n">Lucro estimado</th></tr></thead><tbody>` +
+    (luc.length? luc.map(l=>`
+      <tr><td><div class="pname">${l.p.t}</div><div class="psub">${l.p.c}</div></td>
+      <td class="n">${l.q}</td><td class="n">${brl(l.rec)}</td>
+      <td class="n">${(l.mg*100).toFixed(0)}%</td>
+      <td class="n"><b>${brl(l.lucro)}</b></td></tr>`).join("")
+      : `<tr><td colspan="5" class="empty">Sem vendas no período.</td></tr>`)
+    + `</tbody>`;
+
+  /* --- top / bottom --- */
+  const vend = linhas.filter(l=>l.q>0).sort((a,b)=>b.q-a.q);
+  const topo = vend.length ? vend[0].q : 1;
+  barras(document.getElementById("top"), vend.slice(0,8).map(l=>({t:l.p.t,v:l.q})), v=>v+" un", topo);
+  barras(document.getElementById("bot"), vend.slice(-8).reverse().map(l=>({t:l.p.t,v:l.q})), v=>v+" un", topo);
+
+  /* --- categorias --- */
+  const porCat={};
+  linhas.forEach(l=>{ if(l.q) porCat[l.p.c]=(porCat[l.p.c]||0)+l.p.p*l.q });
+  const cats=Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([t,v])=>({t,v}));
+  barras(document.getElementById("cats"), cats, brl);
+}
+
+function render(){
+  const g=agrega();
+  kpis(g); linha(g); tabelas(g);
+  document.getElementById("upd").textContent =
+    "Atualizado " + HOJE.toLocaleDateString("pt-BR") + " · " + CAT.length + " produtos";
+}
+
+/* ---------- controles ---------- */
+document.getElementById("seg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+  const d=b.dataset.d;
+  document.getElementById("cus").classList.toggle("on", d==="cus");
+  periodo = d==="cus" ? "cus" : +d;
+  if(d==="cus"){
+    const b2=diaData(DIAS-1), a2=diaData(DIAS-30);
+    document.getElementById("d1").value=dstr(a2); document.getElementById("d2").value=dstr(b2);
+    document.getElementById("d1").min=dstr(diaData(0)); document.getElementById("d2").max=dstr(b2);
+  }
+  render();
+});
+document.getElementById("d1").addEventListener("change",render);
+document.getElementById("d2").addEventListener("change",render);
+
+/* margens editáveis */
+document.getElementById("mgs").innerHTML = Object.keys(MARGENS).map(c=>`
+  <div class="mg"><label for="mg-${c}">${c}</label>
+  <input id="mg-${c}" type="number" min="1" max="95" step="1" value="${MARGENS[c]}" data-c="${c}"></div>`).join("");
+document.getElementById("mgs").addEventListener("input",e=>{
+  const c=e.target.dataset.c; if(!c) return;
+  MARGENS[c]=Math.max(1,Math.min(95, +e.target.value||0));
+  render();
+});
+
+/* tema */
+document.getElementById("theme").addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const dark = cur ? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark?"light":"dark");
+  render();
+});
+
+/* login (demonstrativo) */
+document.getElementById("lform").addEventListener("submit",e=>{
+  e.preventDefault();
+  document.getElementById("login").remove();
+  document.getElementById("app").hidden=false;
+  render();
+});
+
+addEventListener("resize",()=>{ if(!document.getElementById("app").hidden) render(); });
+</script>

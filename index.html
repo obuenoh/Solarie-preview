@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solarie — Prévia do projeto</title>
+<meta name="description" content="Prévia da nova loja e do painel administrativo da Solarie Fine Jewelry.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500&family=Quicksand:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap">
+<style>
+:root{
+  --bg:#F2E6D9; --card:#FBF6EF; --ink:#242833; --ink-2:#6E6152; --ink-3:#927F67;
+  --rule:rgba(146,127,103,.30); --brand:#AC8D60; --accent:#A3701F;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#242833; --card:#2C3140; --ink:#F2E6D9; --ink-2:#C3B49F; --ink-3:#9A8B78;
+    --rule:rgba(242,230,217,.20); --brand:#C4B197; --accent:#B8842A;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Quicksand,"Helvetica Neue",Arial,sans-serif;font-weight:500;
+  line-height:1.6;display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:32px 20px;
+}
+.wrap{max-width:660px;width:100%}
+.mark{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.mark svg{width:52px;color:var(--ink)}
+.mark .wm{font-family:Urbanist,sans-serif;font-size:19px;letter-spacing:.3em;
+  text-transform:uppercase;font-weight:300}
+h1{font-family:Urbanist,sans-serif;font-size:clamp(27px,5vw,38px);font-weight:300;
+  letter-spacing:-.01em;margin:0 0 10px;line-height:1.15}
+.sub{color:var(--ink-2);margin:0 0 34px;font-size:16px;max-width:52ch}
+.cards{display:grid;gap:14px}
+a.card{
+  display:block;background:var(--card);border:1px solid var(--rule);padding:22px 24px;
+  text-decoration:none;color:inherit;transition:border-color .15s;
+}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
+a.card h2{font-family:Urbanist,sans-serif;font-size:20px;font-weight:400;margin:0 0 5px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px}
+a.card h2 span.go{font-family:"DM Mono",monospace;font-size:13px;color:var(--accent)}
+a.card p{margin:0;color:var(--ink-2);font-size:14.5px}
+.tag{
+  display:inline-block;font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);border:1px solid var(--rule);
+  padding:3px 8px;margin-bottom:12px
+}
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--rule);
+  font-family:"DM Mono",monospace;font-size:12px;color:var(--ink-3);line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mark">
+    <svg viewBox="0 0 400 165" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M 158 150 A 42 42 0 0 1 242 150"/><line x1="155" y1="150" x2="82" y2="150"/><line x1="157.2" y1="136.1" x2="67.8" y2="107"/><line x1="163.6" y1="123.5" x2="72.2" y2="57.1"/><line x1="173.5" y1="113.6" x2="98.3" y2="10"/><line x1="186.1" y1="107.2" x2="143.6" y2="-23.7"/><line x1="200" y1="105" x2="200" y2="-36"/><line x1="213.9" y1="107.2" x2="256.4" y2="-23.7"/><line x1="226.5" y1="113.6" x2="301.7" y2="10"/><line x1="236.4" y1="123.5" x2="327.8" y2="57.1"/><line x1="242.8" y1="136.1" x2="332.2" y2="107"/><line x1="245" y1="150" x2="318" y2="150"/></g></svg>
+    <span class="wm">Solarie</span>
+  </div>
+
+  <span class="tag">Prévia · não é o site no ar</span>
+  <h1>A nova loja e o painel</h1>
+  <p class="sub">Duas coisas para você navegar e comentar. Funcionam no celular e no computador.</p>
+
+  <div class="cards">
+    <a class="card" href="site/index.html">
+      <h2>A loja <span class="go">abrir →</span></h2>
+      <p>A vitrine reformulada, com o catálogo real: filtros, busca, sacola e páginas de produto.</p>
+    </a>
+    <a class="card" href="painel/index.html">
+      <h2>O painel <span class="go">abrir →</span></h2>
+      <p>O acompanhamento das vendas: o que vende mais, o que está parado e o que precisa repor.
+      Os números são de demonstração — servem para você ver como funciona.</p>
+    </a>
+  </div>
+
+  <footer>
+    Prévia do projeto Solarie Fine Jewelry.<br>
+    Feito por Caíque · consultoria de soluções digitais.
+  </footer>
+</div>
+</body>
+</html>
