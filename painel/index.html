@@ -18,10 +18,10 @@
   --ink-3:#756450;      /* taupe escurecido para texto */
   --rule:rgba(146,127,103,.30);
   --rule-2:rgba(146,127,103,.16);
-  --brand:#AC8D60;       /* bronze da marca — só UI, nunca dado */
+  --brand:#8F6F42;       /* bronze da marca, escurecido p/ atingir 4.3:1 sobre a areia */
   --accent:#A3701F;      /* bronze de dado, validado */
   --accent-w:#EADCC7;
-  --act:#2a78d6;   --act-w:#DDE7F5;  --act-ink:#1E5DA8;
+  --act:#1B5296;   --act-w:#DDE7F5;  --act-ink:#1B5296;
   --crit:#C13B6A;  --crit-w:#F4DCE3; --crit-ink:#8E2A4D;
   --grid:rgba(146,127,103,.20);
 }
@@ -38,7 +38,7 @@
     --brand:#C4B197;
     --accent:#B8842A;
     --accent-w:#3A2E19;
-    --act:#3987e5;   --act-w:#1B2740;  --act-ink:#8FBBEE;
+    --act:#9CC4F0;   --act-w:#1B2740;  --act-ink:#9CC4F0;
     --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
     --grid:rgba(242,230,217,.13);
   }
@@ -55,7 +55,7 @@
   --brand:#C4B197;
   --accent:#B8842A;
   --accent-w:#3A2E19;
-  --act:#3987e5;   --act-w:#1B2740;  --act-ink:#8FBBEE;
+  --act:#9CC4F0;   --act-w:#1B2740;  --act-ink:#9CC4F0;
   --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
   --grid:rgba(242,230,217,.13);
 }
@@ -70,7 +70,7 @@ body{
    DM Mono só onde dígito precisa alinhar em coluna. */
 h1,h2,h3,.kpi-v,.wm{font-family:Urbanist,"Helvetica Neue",Arial,sans-serif}
 .mono,.kpi-v,.kpi-k,.kpi-d,td.n,th.n,th,.pill,.upd,.axis text,.psub,.tip,.custom input,.mg input,.mg label,.lf label,.demo-strip
-  {font-family:"DM Mono",ui-monospace,monospace}
+  {font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
 button{font-family:inherit;cursor:pointer}
 h1,h2,h3{margin:0;font-weight:400;letter-spacing:-.005em}
 
@@ -154,16 +154,19 @@ svg.chart{display:block;width:100%;height:auto}
 .bar-lab{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .bar-track{height:9px;background:var(--rule-2);border-radius:0;margin-top:5px;overflow:hidden}
 .bar-fill{height:100%;background:var(--accent);border-radius:0}
-.bar-val{font-family:"DM Mono",monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.bar-val{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:500}
 
 /* ---------- tabelas ---------- */
 .tw{overflow-x:auto;margin:0 -4px}
 table{border-collapse:collapse;width:100%;font-size:14.5px}
 th{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--ink-3);text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-weight:600}
-td{padding:10px;border-bottom:1px solid var(--rule-2);vertical-align:middle}
+  color:var(--ink-2);text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-weight:600}
+td{padding:10px;border-bottom:1px solid var(--rule-2);vertical-align:middle;color:var(--ink)}
 tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Número é dado, não texto de apoio: cor própria e peso maior, para não sumir
+   quando a webfont falhar ou a tela for clara. */
+td.n{color:var(--ink);font-weight:500;font-size:15px}
 .pname{font-weight:600;color:var(--ink)}
 .psub{font-size:12px;color:var(--ink-3);font-family:"DM Mono",monospace}
 
