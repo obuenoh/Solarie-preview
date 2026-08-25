@@ -14,8 +14,8 @@
   --card:#FBF6EF;        /* areia clara, um degrau acima do fundo */
   --card-2:#EFE3D4;      /* areia profunda para campos */
   --ink:#242833;         /* carvão */
-  --ink-2:#6E6152;       /* taupe escurecido, legível sobre areia */
-  --ink-3:#927F67;       /* taupe da marca */
+  --ink-2:#5C5142;      /* taupe escuro, texto de apoio */
+  --ink-3:#756450;      /* taupe escurecido para texto */
   --rule:rgba(146,127,103,.30);
   --rule-2:rgba(146,127,103,.16);
   --brand:#AC8D60;       /* bronze da marca — só UI, nunca dado */
@@ -32,7 +32,7 @@
     --card-2:#353B4C;
     --ink:#F2E6D9;       /* areia como tinta */
     --ink-2:#C3B49F;
-    --ink-3:#9A8B78;
+    --ink-3:#B4A48D;
     --rule:rgba(242,230,217,.20);
     --rule-2:rgba(242,230,217,.10);
     --brand:#C4B197;
@@ -49,7 +49,7 @@
   --card-2:#353B4C;
   --ink:#F2E6D9;
   --ink-2:#C3B49F;
-  --ink-3:#9A8B78;
+  --ink-3:#B4A48D;
   --rule:rgba(242,230,217,.20);
   --rule-2:rgba(242,230,217,.10);
   --brand:#C4B197;
@@ -64,7 +64,7 @@
 body{
   margin:0;background:var(--bg);color:var(--ink);
   font-family:Quicksand,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.55;
-  font-weight:500;-webkit-font-smoothing:antialiased;
+  font-weight:500;
 }
 /* Urbanist nos títulos, Quicksand no corpo — como no site.
    DM Mono só onde dígito precisa alinhar em coluna. */
@@ -123,7 +123,7 @@ main{max-width:1240px;margin:0 auto;padding:20px 20px 70px}
 .ch{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap}
 .ch h2{font-size:16.5px}
 .ch .q{font-size:13px;color:var(--ink-3);font-style:italic}
-.chelp{font-size:13px;color:var(--ink-2);margin:0 0 16px}
+.chelp{font-size:13.5px;color:var(--ink-2);margin:0 0 16px}
 
 /* ---------- kpis ---------- */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:14px;margin-bottom:16px}
@@ -151,21 +151,21 @@ svg.chart{display:block;width:100%;height:auto}
 /* min-width:0 — sem isso o label de texto longo nao encolhe e empurra
    a coluna do valor para fora da tela no celular. */
 .bar-row>div:first-child{min-width:0}
-.bar-lab{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bar-lab{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .bar-track{height:9px;background:var(--rule-2);border-radius:0;margin-top:5px;overflow:hidden}
 .bar-fill{height:100%;background:var(--accent);border-radius:0}
 .bar-val{font-family:"DM Mono",monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 
 /* ---------- tabelas ---------- */
 .tw{overflow-x:auto;margin:0 -4px}
-table{border-collapse:collapse;width:100%;font-size:13.5px}
-th{font-family:"DM Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink-3);text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-weight:600}
 td{padding:10px;border-bottom:1px solid var(--rule-2);vertical-align:middle}
 tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pname{font-weight:500}
-.psub{font-size:11.5px;color:var(--ink-3);font-family:"DM Mono",monospace}
+.pname{font-weight:600;color:var(--ink)}
+.psub{font-size:12px;color:var(--ink-3);font-family:"DM Mono",monospace}
 
 .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
   padding:3px 8px;border-radius:2px;letter-spacing:.04em;white-space:nowrap}
