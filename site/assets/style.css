@@ -3,11 +3,11 @@
    The brand mark is all hairline: 1px rules, light weights, no shadow. */
 
 :root{
-  --sand:#F2E6D9; --sand-2:#FAF4EC; --sand-3:#E7DACA; --sand-4:#D8C9B4;
-  --ink:#242833; --ink-soft:#3A3F4D;
+  --sand:#F1EFE9; --sand-2:#FAF9F6; --sand-3:#E6E3DA; --sand-4:#D9D5C9;
+  --ink:#382A26; --ink-soft:#54403A;
   --taupe:#927F67; --taupe-2:#6E6152;
   --bronze:#AC8D60; --caramel:#D2A87A;
-  --rule:#DDCEBB; --rule-2:#C4B197;
+  --rule:#DCD8CD; --rule-2:#C6C0B2;
   --alert:#9E4234; --ok:#4A6B4E; --pay:#5A31F4;
   --hd:74px;
   --maxw:1340px;
@@ -84,7 +84,7 @@ h1,h2,h3,.hd{font-family:"Urbanist","Helvetica Neue",Arial,sans-serif;font-weigh
 .mnav .x{font-size:22px;margin-bottom:8px;}
 
 /* ---------------- overlay comum ---------------- */
-.scrim{position:fixed;inset:0;background:rgba(36,40,51,.42);z-index:65;opacity:0;
+.scrim{position:fixed;inset:0;background:rgba(56,42,38,.42);z-index:65;opacity:0;
   pointer-events:none;transition:opacity .25s;}
 .scrim.on{opacity:1;pointer-events:auto;}
 
@@ -135,7 +135,7 @@ h1,h2,h3,.hd{font-family:"Urbanist","Helvetica Neue",Arial,sans-serif;font-weigh
 .hero img{width:100%;height:clamp(420px,72vh,660px);object-fit:cover;object-position:50% 52%;}
 .hero .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
   gap:18px;padding:0 8%;
-  background:linear-gradient(90deg,rgba(242,230,217,.97),rgba(242,230,217,.86) 26%,rgba(242,230,217,.18) 42%,rgba(242,230,217,0) 56%);}
+  background:linear-gradient(90deg,rgba(241,239,233,.97),rgba(241,239,233,.86) 26%,rgba(241,239,233,.18) 42%,rgba(241,239,233,0) 56%);}
 .hero h1{font-size:clamp(32px,5.2vw,58px);font-weight:200;line-height:1.04;max-width:12ch;}
 .hero p{max-width:30ch;color:var(--taupe-2);font-size:16px;}
 .hero .btn{padding-left:34px;padding-right:34px;}
@@ -159,7 +159,7 @@ section.blk{padding:56px 0;}
 .cat{position:relative;overflow:hidden;background:var(--sand-3);}
 .cat img{width:100%;aspect-ratio:4/5;object-fit:cover;transition:transform .5s;}
 .cat:hover img{transform:scale(1.05);}
-.cat span{position:absolute;left:0;right:0;bottom:0;background:rgba(36,40,51,.82);color:var(--sand);
+.cat span{position:absolute;left:0;right:0;bottom:0;background:rgba(56,42,38,.82);color:var(--sand);
   padding:11px;text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;}
 
 /* ---------------- grade de produto ---------------- */
@@ -183,9 +183,9 @@ section.blk{padding:56px 0;}
 .badge.low{background:var(--alert);color:#fff;}
 .badge.sale{background:var(--sand);color:var(--ink);border:1px solid var(--ink);}
 .wish{position:absolute;top:8px;right:8px;z-index:3;font-size:15px;padding:5px 7px;
-  background:rgba(242,230,217,.85);line-height:1;}
+  background:rgba(241,239,233,.85);line-height:1;}
 .wish.on{color:var(--alert);}
-.qadd{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;background:rgba(242,230,217,.96);
+.qadd{position:absolute;left:10px;right:10px;bottom:10px;z-index:3;background:rgba(241,239,233,.96);
   border:1px solid var(--ink);font-size:11px;font-weight:700;letter-spacing:.11em;
   text-transform:uppercase;padding:9px;opacity:0;transition:opacity .2s;}
 .card:hover .qadd{opacity:1;}
@@ -284,7 +284,7 @@ details.acc .body{padding:0 0 14px;font-size:13.5px;color:var(--taupe-2);}
   letter-spacing:.12em;text-transform:uppercase;font-weight:700;}
 .ft{background:var(--ink);color:#C9BDAF;padding:46px 0 20px;}
 .ftop{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:30px;
-  padding-bottom:30px;border-bottom:1px solid #3A3F4D;}
+  padding-bottom:30px;border-bottom:1px solid #54403A;}
 .fbrand svg{width:52px;color:var(--sand);}
 .fbrand p{font-size:13px;margin-top:12px;max-width:30ch;}
 .fc{display:flex;flex-direction:column;gap:8px;}
@@ -316,7 +316,7 @@ details.acc .body{padding:0 0 14px;font-size:13.5px;color:var(--taupe-2);}
   .ftoolbar{top:calc(var(--hd) - 1px);}
   .sticky-atc{display:flex;}
   body.has-sticky{padding-bottom:66px;}
-  .hero .ov{background:linear-gradient(180deg,rgba(242,230,217,.2),rgba(242,230,217,.94) 62%);
+  .hero .ov{background:linear-gradient(180deg,rgba(241,239,233,.2),rgba(241,239,233,.94) 62%);
     justify-content:flex-end;padding-bottom:28px;}
   .hero h1{max-width:100%;}
 }

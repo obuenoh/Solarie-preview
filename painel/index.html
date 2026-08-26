@@ -10,54 +10,54 @@
    derivadas mais escuras, porque a paleta da marca é dessaturada de
    propósito e não alcança o piso de saturação de gráfico. */
 :root{
-  --bg:#F2E6D9;          /* areia */
-  --card:#FBF6EF;        /* areia clara, um degrau acima do fundo */
-  --card-2:#EFE3D4;      /* areia profunda para campos */
-  --ink:#242833;         /* carvão */
+  --bg:#F1EFE9;          /* off-white quente, escolhido pela cliente */
+  --card:#FAF9F6;        /* um degrau acima do fundo */
+  --card-2:#EAE8E0;      /* um degrau abaixo, para campos */
+  --ink:#382A26;         /* marrom escuro, escolhido pela cliente */
   --ink-2:#5C5142;      /* taupe escuro, texto de apoio */
   --ink-3:#756450;      /* taupe escurecido para texto */
   --rule:rgba(146,127,103,.30);
   --rule-2:rgba(146,127,103,.16);
-  --brand:#8F6F42;       /* bronze da marca, escurecido p/ atingir 4.3:1 sobre a areia */
+  --brand:#8F6F42;       /* bronze da marca, escurecido p/ atingir 4,3:1 */
   --accent:#A3701F;      /* bronze de dado, validado */
-  --accent-w:#EADCC7;
+  --accent-w:#EDE8DC;
   --act:#1B5296;   --act-w:#DDE7F5;  --act-ink:#1B5296;
   --crit:#C13B6A;  --crit-w:#F4DCE3; --crit-ink:#8E2A4D;
   --grid:rgba(146,127,103,.20);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#242833;        /* carvão da marca */
-    --card:#2C3140;
-    --card-2:#353B4C;
-    --ink:#F2E6D9;       /* areia como tinta */
+    --bg:#382A26;        /* marrom escuro */
+    --card:#43332E;
+    --card-2:#503D37;
+    --ink:#F1EFE9;       /* off-white como tinta */
     --ink-2:#C3B49F;
     --ink-3:#B4A48D;
-    --rule:rgba(242,230,217,.20);
-    --rule-2:rgba(242,230,217,.10);
+    --rule:rgba(241,239,233,.20);
+    --rule-2:rgba(241,239,233,.10);
     --brand:#C4B197;
     --accent:#B8842A;
-    --accent-w:#3A2E19;
-    --act:#9CC4F0;   --act-w:#1B2740;  --act-ink:#9CC4F0;
-    --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
-    --grid:rgba(242,230,217,.13);
+    --accent-w:#4A3A22;
+    --act:#9CC4F0;   --act-w:#453931;  --act-ink:#9CC4F0;
+    --crit:#d55181;  --crit-w:#4B3230; --crit-ink:#EFA7C0;
+    --grid:rgba(241,239,233,.13);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#242833;
-  --card:#2C3140;
-  --card-2:#353B4C;
-  --ink:#F2E6D9;
+  --bg:#382A26;
+  --card:#43332E;
+  --card-2:#503D37;
+  --ink:#F1EFE9;
   --ink-2:#C3B49F;
   --ink-3:#B4A48D;
-  --rule:rgba(242,230,217,.20);
-  --rule-2:rgba(242,230,217,.10);
+  --rule:rgba(241,239,233,.20);
+  --rule-2:rgba(241,239,233,.10);
   --brand:#C4B197;
   --accent:#B8842A;
-  --accent-w:#3A2E19;
-  --act:#9CC4F0;   --act-w:#1B2740;  --act-ink:#9CC4F0;
-  --crit:#d55181;  --crit-w:#3A2029; --crit-ink:#EFA7C0;
-  --grid:rgba(242,230,217,.13);
+  --accent-w:#4A3A22;
+  --act:#9CC4F0;   --act-w:#453931;  --act-ink:#9CC4F0;
+  --crit:#d55181;  --crit-w:#4B3230; --crit-ink:#EFA7C0;
+  --grid:rgba(241,239,233,.13);
 }
 
 *{box-sizing:border-box}
@@ -162,11 +162,11 @@ table{border-collapse:collapse;width:100%;font-size:14.5px}
 th{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink-2);text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-weight:600}
 td{padding:10px;border-bottom:1px solid var(--rule-2);vertical-align:middle;color:var(--ink)}
-tr:last-child td{border-bottom:0}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* Número é dado, não texto de apoio: cor própria e peso maior, para não sumir
    quando a webfont falhar ou a tela for clara. */
 td.n{color:var(--ink);font-weight:500;font-size:15px}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pname{font-weight:600;color:var(--ink)}
 .psub{font-size:12px;color:var(--ink-3);font-family:"DM Mono",monospace}
 
@@ -174,7 +174,7 @@ td.n{color:var(--ink);font-weight:500;font-size:15px}
   padding:3px 8px;border-radius:2px;letter-spacing:.04em;white-space:nowrap}
 .pill.act{background:var(--act-w);color:var(--act)}
 .pill.crit{background:var(--crit-w);color:var(--crit-ink)}
-.pill.calm{background:var(--rule-2);color:var(--ink-3)}
+.pill.calm{background:var(--rule-2);color:var(--ink-2)}
 .pill i{font-style:normal;font-size:11px}
 
 /* ---------- margem ---------- */
