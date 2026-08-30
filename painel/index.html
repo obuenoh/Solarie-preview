@@ -189,6 +189,10 @@ input.leitor{font-family:"DM Mono",monospace;font-size:16px;letter-spacing:.04em
 .ptrack{flex:1;height:7px;background:var(--rule-2);overflow:hidden;min-width:90px}
 .pfill{height:100%;background:var(--accent);transition:width .25s}
 .pnum{font-family:"DM Mono",monospace;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pitems{margin-top:12px;border-top:1px solid var(--rule);padding-top:10px}
+.pitem{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px}
+.pitem .pt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitem .pq{font-family:"DM Mono",monospace;font-size:12.5px;white-space:nowrap}
 tr.bad td{background:var(--crit-w)}
 .stepper{display:inline-flex;align-items:center;gap:2px}
 .stepper button{width:25px;height:25px;line-height:1;background:var(--card-2);border:1px solid var(--rule);color:var(--ink);border-radius:2px;font-size:14px;padding:0}
@@ -523,108 +527,69 @@ function vVisao(){
   Lucro bruto = receita − (custo × quantidade).</p>`;
 }
 
-/* ============ PRODUTOS ============ */
-let prodF={q:'',c:'',s:'',ord:'rec',dir:-1};
-function vProdutos(){
-  const p=P(), pp=porProduto(p.from,p.to);
-  const U30=u30(),U60=u60(),U90=u90();
-  let rows=CAT.map((pr,pi)=>{
-    const r=pp.get(pi)||{un:0,rec:0,cus:0}, d=statusDe(pi,U30,U60,U90);
-    return {pi,t:pr.t,s:pr.s,c:pr.c,un:r.un,rec:r.rec,cus:r.cus,
-            mar:r.rec>0?((r.rec-r.cus)/r.rec)*100:null, est:d.st, sta:d.s};
-  });
-  const cats=[...new Set(CAT.map(x=>x.c))].sort();
-  const t=prodF.q.trim().toLowerCase();
-  if(t) rows=rows.filter(r=>r.t.toLowerCase().includes(t)||r.s.toLowerCase().includes(t));
-  if(prodF.c) rows=rows.filter(r=>r.c===prodF.c);
-  if(prodF.s) rows=rows.filter(r=>r.sta===prodF.s);
-  rows.sort((a,b)=>{const k=prodF.ord;
-    const x=a[k]===null?-1:a[k], y=b[k]===null?-1:b[k];
-    return (x<y?-1:x>y?1:0)*prodF.dir;});
-  const tot=rows.reduce((a,r)=>({un:a.un+r.un,rec:a.rec+r.rec,cus:a.cus+r.cus}),{un:0,rec:0,cus:0});
-  const vis=rows.slice(0,120);
-  const H=[['t','Produto',''],['s','SKU',''],['un','Unidades','n'],['rec','Receita','n'],
-           ['cus','Custo','n'],['mar','Margem','n'],['est','Estoque','n'],['sta','Status','']];
-  const seta=k=>prodF.ord===k?(prodF.dir<0?' ↓':' ↑'):'';
-
-  return `<div class="h1row"><h1>Produtos</h1><span class="per">${rotuloPer()}</span></div>
-  ${barraPeriodo()}
-  <div class="card">
-    <div class="filters" style="margin-bottom:14px">
-      <input class="fld" id="pq" placeholder="Buscar produto ou SKU" value="${esc(prodF.q)}" style="min-width:200px">
-      <select class="fld" id="pc"><option value="">Todas as categorias</option>
-        ${cats.map(c=>`<option ${prodF.c===c?'selected':''}>${c}</option>`).join('')}</select>
-      <select class="fld" id="ps"><option value="">Todos os status</option>
-        ${['Sem estoque','Repor','Parado','Ok'].map(s=>`<option ${prodF.s===s?'selected':''}>${s}</option>`).join('')}</select>
-      <span class="hint">${int(rows.length)} de ${int(CAT.length)} peças${rows.length>120?' · mostrando as 120 primeiras':''}</span>
-    </div>
-    <div class="tw"><table>
-      <thead><tr>${H.map(([k,l,n])=>`<th class="s ${n}" data-o="${k}">${l}${seta(k)}</th>`).join('')}</tr></thead>
-      <tbody>${vis.length?vis.map(r=>`<tr>
-        <td><div class="pname" title="${esc(r.t)}">${esc(r.t)}</div><span class="sku">${r.c}</span></td>
-        <td><span class="sku">${r.s}</span></td>
-        <td class="n">${int(r.un)}</td><td class="n">${usd(r.rec)}</td><td class="n">${usd(r.cus)}</td>
-        <td class="n">${r.mar===null?'—':r.mar.toFixed(1)+'%'}</td><td class="n">${int(r.est)}</td>
-        <td><span class="pill ${CORS[r.sta]}">${r.sta}</span></td></tr>`).join('')
-        :'<tr><td colspan="8" class="empty">Nenhuma peça com esses filtros.</td></tr>'}</tbody>
-      ${vis.length?`<tfoot><tr><td colspan="2">Total filtrado</td><td class="n">${int(tot.un)}</td>
-        <td class="n">${usd(tot.rec)}</td><td class="n">${usd(tot.cus)}</td>
-        <td class="n">${tot.rec>0?(((tot.rec-tot.cus)/tot.rec)*100).toFixed(1)+'%':'—'}</td>
-        <td colspan="2"></td></tr></tfoot>`:''}
-    </table></div>
-  </div>
-  <p class="hint">Unidades, receita, custo e margem são do período selecionado. Estoque e status são de agora:
-  cobertura = estoque ÷ média diária dos últimos 30 dias.</p>`;
-}
-function ligaProdutos(){
-  const q=el('pq'); if(!q) return;
-  q.addEventListener('input',()=>{prodF.q=q.value;const pos=q.selectionStart;
-    pinta();const n=el('pq');n.focus();n.setSelectionRange(pos,pos);});
-  el('pc').addEventListener('change',e=>{prodF.c=e.target.value;pinta();});
-  el('ps').addEventListener('change',e=>{prodF.s=e.target.value;pinta();});
-  document.querySelectorAll('th[data-o]').forEach(th=>th.addEventListener('click',()=>{
-    const k=th.dataset.o;
-    if(prodF.ord===k) prodF.dir*=-1; else {prodF.ord=k;prodF.dir=(k==='t'||k==='s'||k==='sta')?1:-1;}
-    pinta();}));
-}
-
-/* ============ ESTOQUE ============ */
-let estF='';
+/* ============ ESTOQUE (produtos + estoque, numa aba só) ============ */
+let estF={q:'',c:'',s:'',ord:'st',dir:1};
 function vEstoque(){
   const U30=u30(),U60=u60(),U90=u90();
-  const rows=CAT.map((pr,pi)=>{const d=statusDe(pi,U30,U60,U90);
-    return {t:pr.t, sku:pr.s, custo:pr.k, st:d.st, v30:d.v30, sp:d.sp, cob:d.cob, sta:d.s};});
-  const ORD=['Sem estoque','Repor','Parado','Ok'];
-  const cont=ORD.map(s=>[s,rows.filter(r=>r.sta===s).length]);
-  const vis=(estF?rows.filter(r=>r.sta===estF):rows.slice())
-    .sort((a,b)=>(ORD.indexOf(a.sta)-ORD.indexOf(b.sta))||((a.cob??1e9)-(b.cob??1e9)));
+  let rows=CAT.map((pr,pi)=>{
+    const d=statusDe(pi,U30,U60,U90);
+    const mar=pr.p>0?((pr.p-pr.k)/pr.p)*100:null;
+    return {pi,t:pr.t,s:pr.s,c:pr.c,preco:pr.p,custo:pr.k,mar,st:d.st,sta:d.s};
+  });
+  const cats=[...new Set(CAT.map(x=>x.c))].sort();
+  const t=estF.q.trim().toLowerCase();
+  if(t) rows=rows.filter(r=>r.t.toLowerCase().includes(t)||r.s.toLowerCase().includes(t));
+  if(estF.c) rows=rows.filter(r=>r.c===estF.c);
+  if(estF.s) rows=rows.filter(r=>r.sta===estF.s);
+  rows.sort((a,b)=>{const k=estF.ord;
+    const x=a[k]===null?-1:a[k], y=b[k]===null?-1:b[k];
+    return (x<y?-1:x>y?1:0)*estF.dir;});
+  const vis=rows.slice(0,140);
+  const H=[['preco','Preço','n'],['custo','Custo','n'],['mar','Margem','n'],['st','Estoque','n']];
+  const seta=k=>estF.ord===k?(estF.dir<0?' ↓':' ↑'):'';
   const parado=rows.filter(r=>r.sta==='Parado');
   const valorParado=parado.reduce((a,r)=>a+r.custo*r.st,0);
 
   return `<div class="h1row"><h1>Estoque</h1><span class="per">situação de agora · ${int(CAT.length)} peças</span></div>
-  <div class="filters">
-    <button class="fbtn" data-e="" aria-pressed="${estF===''}">Tudo (${int(rows.length)})</button>
-    ${cont.map(([s,n])=>`<button class="fbtn" data-e="${s}" aria-pressed="${estF===s}">${s} (${int(n)})</button>`).join('')}
+  <p class="desc">Produtos e Estoque, numa aba só: quantidade, SKU, preço, custo, margem e status por peça.</p>
+  <div class="card">
+    <div class="filters" style="margin-bottom:14px">
+      <input class="fld" id="eq" placeholder="Buscar produto ou SKU" value="${esc(estF.q)}" style="min-width:200px">
+      <select class="fld" id="ec"><option value="">Todas as categorias</option>
+        ${cats.map(c=>`<option ${estF.c===c?'selected':''}>${c}</option>`).join('')}</select>
+      <select class="fld" id="es"><option value="">Todos os status</option>
+        ${['Sem estoque','Repor','Parado','Ok'].map(s=>`<option ${estF.s===s?'selected':''}>${s}</option>`).join('')}</select>
+      <span class="hint">${int(rows.length)} de ${int(CAT.length)} peças${rows.length>140?' · mostrando as 140 primeiras':''}</span>
+    </div>
+    ${parado.length?`<div class="box warn"><b>${int(parado.length)} peças sem nenhuma venda em 60 dias</b>, com
+      ${usd(valorParado)} de custo parado na prateleira. É o primeiro lugar para olhar antes de comprar mais.</div>`:''}
+    <div class="tw"><table>
+      <thead><tr><th>Produto</th><th>SKU</th>${H.map(([k,l,n])=>`<th class="s ${n}" data-o="${k}">${l}${seta(k)}</th>`).join('')}<th>Status</th></tr></thead>
+      <tbody>${vis.length?vis.map(r=>`<tr>
+        <td><div class="pname" title="${esc(r.t)}">${esc(r.t)}</div><span class="sku">${r.c}</span></td>
+        <td><span class="sku">${r.s}</span></td>
+        <td class="n">${usd(r.preco)}</td>
+        <td class="n">${r.custo>0?usd(r.custo):'<span class="hint">sem custo</span>'}</td>
+        <td class="n">${r.mar===null?'—':r.mar.toFixed(1)+'%'}</td>
+        <td class="n">${int(r.st)}</td>
+        <td><span class="pill ${CORS[r.sta]}">${r.sta}</span></td></tr>`).join('')
+        :'<tr><td colspan="7" class="empty">Nada encontrado com esses filtros.</td></tr>'}</tbody>
+    </table></div>
   </div>
-  ${parado.length?`<div class="box warn"><b>${int(parado.length)} peças sem nenhuma venda em 60 dias</b>, com
-    ${usd(valorParado)} de custo parado na prateleira. É o primeiro lugar para olhar antes de comprar mais.</div>`:''}
-  <div class="card"><div class="tw"><table>
-    <thead><tr><th>Produto</th><th>SKU</th><th class="n">Estoque</th><th class="n">Vendidos 30d</th>
-      <th class="n">Velocidade</th><th class="n">Cobertura</th><th>Status</th></tr></thead>
-    <tbody>${vis.length?vis.slice(0,140).map(r=>`<tr>
-      <td><div class="pname" title="${esc(r.t)}">${esc(r.t)}</div></td>
-      <td><span class="sku">${r.sku}</span></td>
-      <td class="n">${int(r.st)}</td><td class="n">${int(r.v30)}</td>
-      <td class="n">${r.sp.toFixed(2)}/dia</td>
-      <td class="n">${r.cob===null?'—':`<span style="${r.cob<14?'color:var(--warn);font-weight:600':''}">${Math.round(r.cob)} d</span>`}</td>
-      <td><span class="pill ${CORS[r.sta]}">${r.sta}</span></td></tr>`).join('')
-      :'<tr><td colspan="7" class="empty">Nada nesta faixa.</td></tr>'}</tbody>
-  </table></div>${vis.length>140?`<p class="hint" style="margin-top:10px">Mostrando 140 de ${int(vis.length)}.</p>`:''}</div>
-  <p class="hint">Velocidade = unidades vendidas nos últimos 30 dias ÷ 30. Cobertura = estoque ÷ velocidade:
-  quantos dias o estoque atual ainda dura. “Parado” é peça com estoque e zero venda em 60 dias.</p>`;
+  <p class="hint">Margem = (preço − custo) ÷ preço. Custo sem cadastro aparece como <b>sem custo</b>, nunca como
+  zero. Cobertura (usada no status) = estoque ÷ velocidade média dos últimos 30 dias. “Parado” é peça com
+  estoque e zero venda em 60 dias.</p>`;
 }
 function ligaEstoque(){
-  document.querySelectorAll('.fbtn[data-e]').forEach(b=>b.addEventListener('click',()=>{estF=b.dataset.e;pinta();}));
+  const q=el('eq'); if(!q) return;
+  q.addEventListener('input',()=>{estF.q=q.value;const pos=q.selectionStart;
+    pinta();const n=el('eq');n.focus();n.setSelectionRange(pos,pos);});
+  el('ec').addEventListener('change',e=>{estF.c=e.target.value;pinta();});
+  el('es').addEventListener('change',e=>{estF.s=e.target.value;pinta();});
+  document.querySelectorAll('th[data-o]').forEach(th=>th.addEventListener('click',()=>{
+    const k=th.dataset.o;
+    if(estF.ord===k) estF.dir*=-1; else {estF.ord=k;estF.dir=-1;}
+    pinta();}));
 }
 
 /* ============ REPOSIÇÃO ============ */
@@ -641,10 +606,17 @@ function calcReposicao(){
   rows.sort((a,b)=>a.cob-b.cob);
   return {rows,total:rows.reduce((a,r)=>a+r.cus,0)};
 }
-function listaTexto(rows,total){
+let MANUAL=[];
+function listaTexto(rows,total,manual){
+  const m=manual||[];
+  const linhasManual=m.map(x=>`• ${x.sku||'s/ SKU'} — ${x.produto} — ${x.qtd} un`);
+  const unManual=m.reduce((a,x)=>a+x.qtd,0);
   return ['Pedido de reposição — Solarie','',
-    ...rows.map(r=>`• ${r.sku} — ${r.t} — ${r.sug} un`),'',
-    `Total de itens: ${rows.reduce((a,r)=>a+r.sug,0)}`,
+    'Sugeridos pelo sistema (cobertura baixa):',
+    ...(rows.length?rows.map(r=>`• ${r.sku} — ${r.t} — ${r.sug} un`):['(nenhum)']),'',
+    'Adicionados manualmente:',
+    ...(linhasManual.length?linhasManual:['(nenhum)']),'',
+    `Total de itens: ${rows.reduce((a,r)=>a+r.sug,0)+unManual}`,
     `Custo estimado: US$ ${total.toFixed(2)}`].join('\n');
 }
 function vReposicao(){
@@ -653,11 +625,11 @@ function vReposicao(){
   return `<div class="h1row"><h1>Reposição</h1>
     <span class="per">cobertura abaixo de 30 dias · compra para 60 dias</span></div>
   <div class="kpis">
-    <div class="kpi"><div class="kk">Total da compra</div><div class="kv">${usd(total)}</div></div>
+    <div class="kpi"><div class="kk">Total sugerido pelo sistema</div><div class="kv">${usd(total)}</div></div>
     <div class="kpi"><div class="kk">Peças</div><div class="kv">${int(un)}</div></div>
     <div class="kpi"><div class="kk">SKUs</div><div class="kv">${int(rows.length)}</div></div>
   </div>
-  <div class="card"><div class="tw"><table>
+  <div class="card"><div class="ch"><h2>Sugeridos pelo sistema</h2></div><div class="tw"><table>
     <thead><tr><th>Produto</th><th>SKU</th><th class="n">Estoque</th><th class="n">Velocidade</th>
       <th class="n">Cobertura</th><th class="n">Comprar</th><th class="n">Custo estimado</th></tr></thead>
     <tbody>${rows.length?rows.map(r=>`<tr>
@@ -669,22 +641,51 @@ function vReposicao(){
       <td class="n">${usd(r.cus)}</td></tr>`).join('')
       :'<tr><td colspan="7" class="empty">Nenhum SKU abaixo de 30 dias de cobertura.</td></tr>'}</tbody>
   </table></div></div>
-  ${rows.length?`<div class="card">
+
+  <div class="card">
+    <div class="ch"><h2>Adicionados manualmente</h2></div>
+    <p class="chelp">Peças que você quer repor, mesmo sem sugestão automática de venda.</p>
+    <form id="fman" class="itf" style="margin-bottom:14px">
+      <div><label>Produto</label><input class="fld" id="mp" required></div>
+      <div><label>SKU (opcional)</label><input class="fld" id="ms"></div>
+      <div><label>Quantidade</label><input class="fld" id="mq" type="number" min="1" value="1" required></div>
+      <div style="align-self:end"><button class="dark" type="submit">Adicionar à lista</button></div>
+    </form>
+    <div class="tw"><table>
+      <thead><tr><th>Produto</th><th>SKU</th><th class="n">Quantidade</th><th></th></tr></thead>
+      <tbody>${MANUAL.length?MANUAL.map((m,i)=>`<tr>
+        <td>${esc(m.produto)}</td><td><span class="sku">${m.sku||'—'}</span></td>
+        <td class="n">${int(m.qtd)}</td>
+        <td class="n"><button class="lnk" data-rm="${i}">remover</button></td></tr>`).join('')
+        :'<tr><td colspan="4" class="empty">Nenhum item adicionado manualmente.</td></tr>'}</tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
     <div class="ch"><h2>Lista para o fornecedor</h2></div>
-    <p class="chelp">Texto simples, pronto para colar no WhatsApp.</p>
-    <button class="dark" id="copiar">Copiar lista</button>
-    <textarea class="lista" id="lista" rows="12" readonly>${esc(listaTexto(rows,total))}</textarea>
-  </div>`:''}
+    <p class="chelp">Inclui os sugeridos e os manuais. Texto simples, pronto para colar no WhatsApp.</p>
+    <button class="dark" id="copiar">Copiar lista completa</button>
+    <textarea class="lista" id="lista" rows="14" readonly>${esc(listaTexto(rows,total,MANUAL))}</textarea>
+  </div>
   <p class="hint">Comprar = velocidade × 60 dias − estoque atual. Custo estimado usa o custo por peça
-  cadastrado na Shopify (aqui, simulado).</p>`;
+  cadastrado na Shopify (aqui, simulado) e não conta os itens manuais, que não têm custo informado.</p>`;
 }
 function ligaReposicao(){
-  const b=el('copiar'); if(!b) return;
-  b.addEventListener('click',()=>{
+  const b=el('copiar');
+  if(b) b.addEventListener('click',()=>{
     const t=el('lista');
     navigator.clipboard.writeText(t.value).then(()=>{b.textContent='Copiado';
-      setTimeout(()=>b.textContent='Copiar lista',1600);},()=>{t.select();});
+      setTimeout(()=>b.textContent='Copiar lista completa',1600);},()=>{t.select();});
   });
+  const f=el('fman');
+  if(f) f.addEventListener('submit',e=>{
+    e.preventDefault();
+    const produto=el('mp').value.trim(); if(!produto) return;
+    const sku=el('ms').value.trim(), qtd=Math.max(1,Math.round(Number(el('mq').value)||1));
+    MANUAL.push({produto,sku,qtd}); pinta();
+  });
+  document.querySelectorAll('[data-rm]').forEach(x=>x.addEventListener('click',()=>{
+    MANUAL.splice(Number(x.dataset.rm),1); pinta();}));
 }
 
 /* ============ CANAIS ============ */
@@ -729,7 +730,7 @@ let notaAberta=null;
 NOTAS.forEach(n=>{n.itens=n.itens.map(([pi,q,c],k)=>({
   k:n.id+'-'+k, orig:CAT[(pi*37+11)%CAT.length].t.toUpperCase().slice(0,26),
   t:CAT[(pi*37+11)%CAT.length].t, sku:CAT[(pi*37+11)%CAT.length].s,
-  q, custo:c, preco:+(c*3.4).toFixed(2), inc:true, pub:n.status==='publicada'}));});
+  q, custo:c, preco:+(c*3.4).toFixed(2), inc:true, pub:n.status==='publicada', foto:false}));});
 
 function vNotas(){
   if(notaAberta) return vNota(NOTAS.find(n=>n.id===notaAberta));
@@ -742,17 +743,19 @@ function vNotas(){
     <p class="hint" style="margin:10px 0 0">No protótipo o envio simula uma extração já pronta.</p>
   </div>
   <div class="card"><div class="tw"><table>
-    <thead><tr><th>Nota</th><th>Fornecedor</th><th class="n">Itens</th><th class="n">Publicados</th>
-      <th>Status</th><th>Entrada</th></tr></thead>
-    <tbody>${NOTAS.map(n=>{const pub=n.itens.filter(i=>i.pub).length;return `<tr>
+    <thead><tr><th>Nota</th><th>Fornecedor</th><th class="n">Itens</th><th class="n">Unidades</th>
+      <th class="n">Publicados</th><th>Status</th><th>Entrada</th></tr></thead>
+    <tbody>${NOTAS.map(n=>{const pub=n.itens.filter(i=>i.pub).length,un=n.itens.reduce((a,i)=>a+i.q,0);return `<tr>
       <td><button class="nlink" data-n="${n.id}">${n.num?'NF '+n.num:esc(n.arq)}</button></td>
-      <td>${esc(n.forn)}</td><td class="n">${n.itens.length}</td><td class="n">${pub}</td>
+      <td>${esc(n.forn)}</td><td class="n">${n.itens.length}</td>
+      <td class="n" style="font-weight:600">${int(un)}</td><td class="n">${pub}</td>
       <td><span class="pill ${n.status==='publicada'?'ok':'warn'}">${n.status}</span></td>
       <td class="n"><span class="sku">${dm(new Date(HOJE.getTime()-n.dias*864e5))}</span></td></tr>`;}).join('')}</tbody>
   </table></div></div>`;
 }
 function vNota(n){
   const pend=n.itens.filter(i=>i.inc&&!i.pub).length;
+  const comFoto=n.itens.filter(i=>i.foto);
   return `<div class="h1row"><button class="nlink" id="volta">← Notas</button>
     <h1>${n.num?'NF '+n.num:esc(n.arq)}</h1><span class="per">${esc(n.forn)}</span></div>
   <div class="box info">A IA leu ${n.itens.length} itens da nota. Confira título, SKU e preço antes de publicar —
@@ -762,7 +765,8 @@ function vNota(n){
       <label class="chk" style="margin:0"><input type="checkbox" data-inc="${i.k}" ${i.inc?'checked':''}
         ${i.pub?'disabled':''}></label>
       <div>
-        <div class="orig">na nota: ${esc(i.orig)} · ${i.q} un · custo R$ ${i.custo.toFixed(2)}</div>
+        <div class="orig">na nota: ${esc(i.orig)} · ${i.q} un · custo R$ ${i.custo.toFixed(2)}
+          ${i.foto?' · <span class="pill ok">foto anexada</span>':''}</div>
         <div class="itf">
           <div><label>Título sugerido</label><input class="fld" data-f="t" data-k="${i.k}" value="${esc(i.t)}" ${i.pub?'disabled':''}></div>
           <div><label>SKU</label><input class="fld" data-f="sku" data-k="${i.k}" value="${i.sku}" ${i.pub?'disabled':''}></div>
@@ -776,7 +780,27 @@ function vNota(n){
       <button class="dark" id="pub" ${pend?'':'disabled'}>Publicar ${pend} ite${pend===1?'m':'ns'} na Shopify</button>
       <span class="hint">${pend?'Cria os produtos como rascunho, com custo, preço e estoque da nota.':'Nada pendente nesta nota.'}</span>
     </div>
-  </div>`;
+  </div>
+
+  <div class="card">
+    <div class="ch"><h2>Fotos dos produtos</h2></div>
+    <p class="chelp">Suba as fotos das peças desta nota. A IA casa cada foto com o item correspondente e monta a
+    prévia da publicação abaixo, antes de você aprovar e publicar.</p>
+    <button class="dark" id="simfoto" ${n.itens.every(i=>i.foto||i.pub)?'disabled':''}>Simular envio de fotos</button>
+    <p class="hint" style="margin:10px 0 0">No protótipo o envio simula a IA casando as fotos com os itens pendentes.</p>
+  </div>
+
+  ${comFoto.length?`<div class="card">
+    <div class="ch"><h2>Prévia da publicação</h2></div>
+    <p class="chelp">Como cada peça vai aparecer na loja, antes de publicar.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+      ${comFoto.map(i=>`<div style="border:1px solid var(--rule);padding:8px">
+        <div style="aspect-ratio:1;background:var(--card-2);border:1px solid var(--rule-2);display:flex;align-items:center;justify-content:center;font-size:28px">💍</div>
+        <div class="pname" style="margin-top:8px;font-size:13.5px">${esc(i.t)}</div>
+        <div class="sku">${i.sku} · US$ ${i.preco.toFixed(2)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`:''}`;
 }
 function ligaNotas(){
   const u=el('upl');
@@ -786,12 +810,18 @@ function ligaNotas(){
       dias:0,status:'revisao',itens:[]};
     n.itens=[0,1,2].map(z=>{const p=CAT[(base+z*29)%CAT.length];
       return {k:n.id+'-'+z,orig:p.t.toUpperCase().slice(0,26),t:p.t,sku:p.s,q:6+z*4,
-        custo:+(p.p*0.31).toFixed(2),preco:p.p,inc:true,pub:false};});
+        custo:+(p.p*0.31).toFixed(2),preco:p.p,inc:true,pub:false,foto:false};});
     NOTAS.unshift(n); toast('Nota lida. '+n.itens.length+' itens extraídos.'); pinta();
   });
   document.querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>{notaAberta=b.dataset.n;pinta();}));
   const v=el('volta'); if(v) v.addEventListener('click',()=>{notaAberta=null;pinta();});
   const n=NOTAS.find(x=>x.id===notaAberta);
+  const sf=el('simfoto');
+  if(sf) sf.addEventListener('click',()=>{
+    let c=0; n.itens.forEach(i=>{if(!i.foto&&!i.pub&&c<3){i.foto=true;c++;}});
+    toast(c+' foto'+(c===1?'':'s')+' casada'+(c===1?'':'s')+' com os itens da nota.');
+    pinta();
+  });
   document.querySelectorAll('[data-inc]').forEach(c=>c.addEventListener('change',()=>{
     n.itens.find(i=>i.k===c.dataset.inc).inc=c.checked;pinta();}));
   document.querySelectorAll('[data-f]').forEach(f=>f.addEventListener('change',()=>{
@@ -812,7 +842,6 @@ const ORIGENS=[
   {id:'presencial',n:'Venda presencial',w:'Registra a venda e desconta',p:'dn',pt:'Desconta'},
   {id:'troca',n:'Troca ou devolução',w:'Registra entrada e saída das peças',p:'both',pt:'Dos dois lados'},
   {id:'brinde',n:'Brinde ou uso interno',w:'Desconta sem contabilizar como venda',p:'dn',pt:'Desconta'},
-  {id:'ajuste',n:'Ajuste de estoque',w:'Corrige divergência com justificativa',p:'act',pt:'P/ mais ou p/ menos'},
 ];
 const NOMEO=Object.fromEntries(ORIGENS.map(o=>[o.id,o.n]));
 const EXPLICA={
@@ -820,9 +849,8 @@ const EXPLICA={
   presencial:'Cria um <b>pedido de verdade no Shopify</b>, com a tag <code>presencial</code>. Quem desconta o estoque é o próprio Shopify ao concluir o pedido — o painel não ajusta inventário por fora. A venda aparece em <b>Canais</b>, como POS.',
   troca:'Marque cada peça como <b>voltou</b> ou <b>saiu</b>. As que voltaram retornam ao estoque, as que saíram descontam. Não gera faturamento.',
   brinde:'Desconta do estoque <b>sem criar pedido</b> — senão infla o faturamento com uma venda que não existiu.',
-  ajuste:'Corrige divergência de contagem, para mais ou para menos. Exige <b>justificativa</b> e não conta como venda.',
 };
-const COMFOTO=CAT.map((p,i)=>({p,i})).filter(x=>x.p.i);
+const COMFOTO=CAT.map((p,i)=>({p,i}));
 const achaSku=s=>{const i=CAT.findIndex(p=>p.s.toUpperCase()===String(s).trim().toUpperCase());
   return i<0?null:{...CAT[i],pi:i};};
 
@@ -834,7 +862,7 @@ function montaPedidos(){
 }
 const PEDIDOSABERTOS=montaPedidos();
 
-let sOrigem=null,sPecas=[],sPedido=null,sAceita=false,sQuem='',sAberto=null,sMsg=null,sJust='',sEnviando=false;
+let sOrigem=null,sPecas=[],sPedido=null,sAceita=false,sQuem='',sAberto=null,sMsg=null,sEnviando=false;
 let MOVS=null;
 function iniciaMovs(){
   if(MOVS) return;
@@ -863,7 +891,7 @@ function sConf(){
   if(bip<esp) return{e:'faltou',k:'warn',t:`Falta uma peça: o pedido possui ${esp} itens, mas somente ${bip} foram bipados.`,esp,bip};
   return{e:'conferido',k:'ok',t:'Pedido conferido: todas as peças foram bipadas.',esp,bip};
 }
-const sDelta=p=>sOrigem==='ajuste'?p.q:sOrigem==='troca'?(p.dir==='voltou'?p.q:-p.q):sOrigem==='pedido'?0:-Math.abs(p.q);
+const sDelta=p=>sOrigem==='troca'?(p.dir==='voltou'?p.q:-p.q):sOrigem==='pedido'?0:-Math.abs(p.q);
 
 function vSaidas(){
   iniciaMovs();
@@ -875,9 +903,8 @@ function vSaidas(){
     sug.push({sku:fora.p.s,rot:fora.p.s+' · peça de outro pedido'});
   } else if(sOrigem) sug=COMFOTO.slice(0,5).map(x=>({sku:x.p.s,rot:x.p.s}));
 
-  const faltaJust=sOrigem==='ajuste'&&!sJust.trim();
   const bloq=sOrigem==='pedido'&&!(cf&&(cf.e==='conferido'||sAceita));
-  const ok=sPronto()&&uteis.length>0&&sQuem.trim()&&!faltaJust&&!bloq;
+  const ok=sPronto()&&uteis.length>0&&sQuem.trim()&&!bloq;
 
   return `<div class="sgrid"><div>
   <h1>Controle de Saídas</h1>
@@ -897,7 +924,12 @@ function vSaidas(){
       <div class="aclist" id="acl" hidden></div></div>
     ${cf?`<div class="prog"><div class="ptrack"><div class="pfill" style="width:${cf.esp?Math.min(100,cf.bip/cf.esp*100):0}%"></div></div>
       <span class="pnum">bipadas ${cf.bip} de ${cf.esp} peças</span></div>
-      <div class="box ${cf.k}">${cf.t}</div>`:''}
+      <div class="box ${cf.k}">${cf.t}</div>
+      <div class="pitems"><span class="lab">O que tem no pedido ${sPedido.n}</span>
+        ${sPedido.itens.map(i=>{const pr=achaSku(i.sku),bip=sPecas.find(x=>x.sku===i.sku)?.q||0;
+          return `<div class="pitem"><span class="pt">${esc(pr?pr.t:i.sku)} <span class="sku">${i.sku}</span></span>
+          <span class="pq" style="color:${bip>=i.q?'var(--ok)':'var(--ink-3)'}">${bip} / ${i.q}</span></div>`;}).join('')}
+      </div>`:''}
   </div>`:''}
 
   <div class="card"><span class="lab">${sOrigem==='pedido'?'3':'2'} · Leitura</span>
@@ -914,19 +946,17 @@ function vSaidas(){
       ${sOrigem==='troca'?'<th>Direção</th>':''}<th class="n">Qtd</th><th>Estado</th><th></th></tr></thead>
       <tbody>${sPecas.length?sPecas.map(p=>`<tr class="${p.est!=='ok'?'bad':''}">
         <td>${p.img?`<img class="th" src="${p.img}" alt="">`:'<div class="th"></div>'}</td>
-        <td><div class="pname">${esc(p.t)}</div></td><td><span class="sku">${p.sku}</span></td>
+        <td><div class="pname">${esc(p.t)}</div></td>
+        <td><span class="sku">${p.sku}</span>${sOrigem==='presencial'?`<br><span class="hint">estoque: ${CAT[p.pi].e}</span>`:''}</td>
         ${sOrigem==='troca'?`<td><button class="dirbtn" data-d="${p.dir}" data-dir="${p.sku}">${p.dir}</button></td>`:''}
         <td class="n"><span class="stepper"><button data-m="${p.sku}" aria-label="Menos uma">−</button>
-          <span class="qt">${sOrigem==='ajuste'&&p.q>0?'+':''}${p.q}</span>
-          <button data-p2="${p.sku}" aria-label="Mais uma">+</button></span></td>
+          <span class="qt">${p.q}</span>
+          <button data-p2="${p.sku}" aria-label="Mais uma" ${sOrigem==='presencial'&&p.q>=CAT[p.pi].e?'disabled':''}>+</button></span></td>
         <td>${p.est==='fora'?'<span class="pill crit">fora do pedido</span>':p.est==='amais'
           ?'<span class="pill crit">quantidade a mais</span>':'<span class="pill cal">ok</span>'}</td>
         <td class="n"><button class="lnk" data-r="${p.sku}">remover</button></td></tr>`).join('')
         :`<tr><td colspan="${sOrigem==='troca'?7:6}" class="empty">Nenhuma peça bipada ainda.</td></tr>`}</tbody>
     </table></div>
-
-    ${sOrigem==='ajuste'?`<div style="margin-top:15px"><label class="lab" for="just">Justificativa do ajuste · obrigatória</label>
-      <textarea class="fld" id="just" placeholder="Ex.: recontagem da gaveta 3 — duas peças a mais que o sistema.">${esc(sJust)}</textarea></div>`:''}
 
     ${uteis.length?`<div class="efe"><h3>O que acontece no estoque</h3>${
       sOrigem==='pedido'
@@ -946,7 +976,7 @@ function vSaidas(){
         <input class="fld" id="quem" value="${esc(sQuem)}" placeholder="Seu nome" style="width:100%"></div>
       <button class="dark" id="conf" ${ok?'':'disabled'}>${sEnviando?'Confirmando…':'Confirmar saída'}</button>
       <span class="hint">${ok?'':!sOrigem?'Escolha a origem.':(sOrigem==='pedido'&&!sPedido)?'Escolha o pedido.'
-        :!uteis.length?'Bipe ao menos uma peça.':faltaJust?'Ajuste de estoque exige justificativa.'
+        :!uteis.length?'Bipe ao menos uma peça.'
         :bloq?'Confira o pedido ou marque a divergência.':!sQuem.trim()?'Informe quem confirmou.':''}</span>
     </div>
   </div></div>
@@ -970,6 +1000,12 @@ function sBipar(cod){
   const p=achaSku(cod);
   if(!p){sMsg={k:'err',t:`Código não encontrado no catálogo: <b>${esc(cod)}</b>. A lista abaixo continua como estava.`};pinta();return;}
   const ex=sPecas.find(x=>x.sku===p.s);
+  const futura=(ex?ex.q:0)+1;
+  if(sOrigem==='presencial'&&futura>CAT[p.pi].e){
+    sMsg={k:'err',t:CAT[p.pi].e===0?`Sem estoque disponível para <b>${p.s}</b>.`
+      :`Estoque máximo atingido: só há ${CAT[p.pi].e} unidade(s) de <b>${p.s}</b> em estoque.`};
+    pinta(); return;
+  }
   if(ex) ex.q++; else sPecas.push({sku:p.s,pi:p.pi,t:p.t,img:p.i||null,pr:p.p,q:1,dir:'saiu',est:'ok'});
   sMsg=null; sRevisar(); pinta();
 }
@@ -977,7 +1013,7 @@ function ligaSaidas(){
   document.querySelectorAll('.og').forEach(b=>b.addEventListener('click',()=>{
     if(b.dataset.o===sOrigem) return;
     if(sPecas.length&&!confirm('Trocar a origem limpa as peças já bipadas. Continuar?')) return;
-    sOrigem=b.dataset.o;sPecas=[];sPedido=null;sAceita=false;sJust='';sMsg=null;pinta();
+    sOrigem=b.dataset.o;sPecas=[];sPedido=null;sAceita=false;sMsg=null;pinta();
     const c=el('cod'); if(c) c.focus();
   }));
   const ped=el('ped');
@@ -1002,12 +1038,13 @@ function ligaSaidas(){
   document.querySelectorAll('[data-r],[data-m],[data-p2],[data-dir]').forEach(b=>b.addEventListener('click',()=>{
     const d=b.dataset;
     if(d.r) sPecas=sPecas.filter(p=>p.sku!==d.r);
-    else if(d.m||d.p2){const p=sPecas.find(x=>x.sku===(d.m||d.p2));p.q+=d.m?-1:1;
-      if(sOrigem!=='ajuste'&&p.q<1)p.q=1;}
+    else if(d.m||d.p2){
+      const p=sPecas.find(x=>x.sku===(d.m||d.p2));
+      const emCap=d.p2&&sOrigem==='presencial'&&p.q>=CAT[p.pi].e;
+      if(!emCap){ p.q+=d.m?-1:1; if(p.q<1)p.q=1; }
+    }
     else if(d.dir){const p=sPecas.find(x=>x.sku===d.dir);p.dir=p.dir==='saiu'?'voltou':'saiu';}
     sRevisar();pinta();}));
-  const j=el('just'); if(j) j.addEventListener('input',()=>{sJust=j.value;
-    const p=j.selectionStart;pinta();const n=el('just');n.focus();n.setSelectionRange(p,p);});
   const q=el('quem'); if(q) q.addEventListener('input',()=>{sQuem=q.value;
     const p=q.selectionStart;pinta();const n=el('quem');n.focus();n.setSelectionRange(p,p);});
   const a=el('acc'); if(a) a.addEventListener('change',()=>{sAceita=a.checked;pinta();});
@@ -1028,13 +1065,13 @@ function ligaSaidas(){
         h:String(ag.getHours()).padStart(2,'0')+':'+String(ag.getMinutes()).padStart(2,'0'),
         o:sOrigem, ped:sOrigem==='pedido'?sPedido.n:(sOrigem==='presencial'?'#SOL-'+(1049+MOVS.length):null),
         por:sQuem.trim(), conf:cf?cf.e:null, div:!!(cf&&cf.e!=='conferido'&&sAceita),
-        just:sOrigem==='ajuste'?sJust.trim():null,
+        just:null,
         itens:uteis.map(p=>({sku:p.sku,t:p.t,img:p.img,q:p.q,dir:p.dir,est:p.est,pr:p.pr})),
         val:sOrigem==='presencial'?uteis.reduce((a,p)=>a+p.pr*p.q,0):null});
       toast(sOrigem==='pedido'?'Pedido conferido. Estoque não foi tocado.'
           :sOrigem==='presencial'?'Venda registrada. O Shopify desconta as peças.'
           :'Movimento registrado. Estoque atualizado.');
-      sPecas=[];sPedido=null;sAceita=false;sJust='';sEnviando=false;sMsg=null;
+      sPecas=[];sPedido=null;sAceita=false;sEnviando=false;sMsg=null;
       pinta(); const cc=el('cod'); if(cc) cc.focus();
     },520);
   });
@@ -1045,7 +1082,6 @@ function toast(t){const n=el('toast');n.textContent=t;n.classList.add('on');
 /* ============ ROTEADOR ============ */
 const VIEWS=[
   ['','Visão geral',vVisao,()=>{ligaPeriodo();ligaGrafico(P());}],
-  ['produtos','Produtos',vProdutos,()=>{ligaPeriodo();ligaProdutos();}],
   ['estoque','Estoque',vEstoque,ligaEstoque],
   ['reposicao','Reposição',vReposicao,ligaReposicao],
   ['saidas','Controle de Saídas',vSaidas,ligaSaidas],
@@ -1063,7 +1099,7 @@ function pinta(){
 function rota(){pinta();window.scrollTo({top:0});}
 addEventListener('hashchange',()=>{notaAberta=null;pinta();window.scrollTo({top:0});});
 el('upd').textContent='atualizado agora · '+HOJE.toLocaleDateString('pt-BR');
-el('rodape').innerHTML=`Painel Solarie · protótipo navegável das 7 abas<br>
+el('rodape').innerHTML=`Painel Solarie · protótipo navegável das 6 abas<br>
   Catálogo: <b>402 produtos reais</b> (auditoria de 24/08/2026) — títulos, preços, categorias e fotos verdadeiros.<br>
   Vendas, estoque, custo, pedidos e notas: <b>simulados</b> para demonstrar o funcionamento. Nenhum número aqui é venda real.<br>
   Os SKUs são <b>gerados para o protótipo</b>: o catálogo real tem 757 variantes e <b>nenhuma com SKU ou código de barras</b>.<br>
