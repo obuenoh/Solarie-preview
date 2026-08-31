@@ -863,6 +863,7 @@ function montaPedidos(){
 const PEDIDOSABERTOS=montaPedidos();
 
 let sOrigem=null,sPecas=[],sPedido=null,sAceita=false,sQuem='',sAberto=null,sMsg=null,sEnviando=false;
+let relOrigem='';
 let MOVS=null;
 function iniciaMovs(){
   if(MOVS) return;
@@ -993,6 +994,7 @@ function vSaidas(){
         <div class="meta">${m.conf?'conferência: '+m.conf+'<br>':''}${m.div?'divergência aceita<br>':''}
         ${m.just?'justificativa: '+esc(m.just)+'<br>':''}confirmado por ${esc(m.por)}</div></div>`:''}</div>`;}).join('')
       :'<p class="empty">Nenhuma saída hoje.</p>'}
+    <button class="dark" id="relatorio" style="width:100%;margin-top:12px">Ver relatório de vendas</button>
   </div></aside></div>`;
 }
 
@@ -1050,6 +1052,7 @@ function ligaSaidas(){
   const a=el('acc'); if(a) a.addEventListener('change',()=>{sAceita=a.checked;pinta();});
   document.querySelectorAll('[data-mv]').forEach(b=>b.addEventListener('click',()=>{
     sAberto=sAberto===b.dataset.mv?null:b.dataset.mv;pinta();}));
+  const rel=el('relatorio'); if(rel) rel.addEventListener('click',()=>{location.hash='#/saidas-relatorio';});
   const c=el('conf');
   if(c) c.addEventListener('click',()=>{
     if(c.disabled||sEnviando) return;
@@ -1079,6 +1082,57 @@ function ligaSaidas(){
 function toast(t){const n=el('toast');n.textContent=t;n.classList.add('on');
   clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('on'),3400);}
 
+/* ============ RELATÓRIO DE SAÍDAS ============ */
+function relMovimentos(p){
+  const linhas=[];
+  for(const o of janela(p.from,p.to)){
+    const origem=o.pos?'presencial':'pedido';
+    const pecas=o.itens.reduce((a,it)=>a+it.q,0);
+    const val=origem==='presencial'?o.itens.reduce((a,it)=>a+CAT[it.pi].p*it.q,0):null;
+    linhas.push({dia:o.d,origem,pecas,val,ped:origem==='presencial'?'#SOL-'+(1000+PEDIDOS.indexOf(o)):'—',por:'—'});
+  }
+  iniciaMovs();
+  if(p.from<=DIAS-1&&DIAS-1<p.to){
+    MOVS.filter(m=>m.o==='troca'||m.o==='brinde').forEach(m=>{
+      linhas.push({dia:DIAS-1,origem:m.o,pecas:m.itens.reduce((a,i)=>a+Math.abs(i.q),0),val:null,
+        ped:m.ped||'—',por:m.por});
+    });
+  }
+  return (relOrigem?linhas.filter(l=>l.origem===relOrigem):linhas).sort((a,b)=>b.dia-a.dia);
+}
+function vRelatorioSaidas(){
+  const p=P(), linhas=relMovimentos(p);
+  const totPecas=linhas.reduce((a,l)=>a+l.pecas,0);
+  const totValor=linhas.reduce((a,l)=>a+(l.val||0),0);
+  const FILTROS=[{id:'',n:'Todas as origens'},...ORIGENS.map(o=>({id:o.id,n:o.n}))];
+  const vis=linhas.slice(0,200);
+
+  return `<div class="h1row"><h1>Relatório de saídas</h1><span class="per">${rotuloPer()}</span>
+    <button class="nlink" id="voltaSaidas" style="margin-left:auto">← Controle de Saídas</button></div>
+  ${barraPeriodo()}
+  <div class="filters">${FILTROS.map(f=>`<button class="fbtn" data-ro="${f.id}" aria-pressed="${relOrigem===f.id}">${f.n}</button>`).join('')}</div>
+  <div class="kpis">
+    <div class="kpi"><div class="kk">Saídas</div><div class="kv">${int(linhas.length)}</div></div>
+    <div class="kpi"><div class="kk">Peças</div><div class="kv">${int(totPecas)}</div></div>
+    <div class="kpi"><div class="kk">Valor (venda presencial)</div><div class="kv">${usd(totValor)}</div></div>
+  </div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Dia</th><th>Origem</th><th>Pedido</th><th class="n">Peças</th><th class="n">Valor</th><th>Confirmado por</th></tr></thead>
+    <tbody>${vis.length?vis.map(l=>`<tr><td>${dm(dataDe(l.dia))}</td><td>${NOMEO[l.origem]}</td>
+      <td>${l.ped}</td><td class="n">${int(l.pecas)}</td><td class="n">${l.val!=null?usd(l.val):'—'}</td>
+      <td>${esc(l.por)}</td></tr>`).join('')
+      :'<tr><td colspan="6" class="empty">Nenhuma saída neste período com esse filtro.</td></tr>'}</tbody>
+  </table></div>${linhas.length>200?`<p class="hint" style="margin-top:10px">Mostrando 200 de ${int(linhas.length)}.</p>`:''}</div>
+  <p class="hint">Valor só existe pra venda presencial — é a única origem que vira pedido de verdade na Shopify
+  com preço. Pedido do site, troca e brinde não geram valor aqui. Pedido do site e venda presencial vêm do
+  histórico simulado de pedidos; troca e brinde só aparecem aqui a partir de hoje.</p>`;
+}
+function ligaRelatorioSaidas(){
+  ligaPeriodo();
+  document.querySelectorAll('.fbtn[data-ro]').forEach(b=>b.addEventListener('click',()=>{relOrigem=b.dataset.ro;pinta();}));
+  const v=el('voltaSaidas'); if(v) v.addEventListener('click',()=>{location.hash='#/saidas';});
+}
+
 /* ============ ROTEADOR ============ */
 const VIEWS=[
   ['','Visão geral',vVisao,()=>{ligaPeriodo();ligaGrafico(P());}],
@@ -1088,12 +1142,18 @@ const VIEWS=[
   ['canais','Canais',vCanais,ligaPeriodo],
   ['notas','Notas',vNotas,ligaNotas],
 ];
+const ROTAS_OCULTAS=[
+  ['saidas-relatorio',vRelatorioSaidas,ligaRelatorioSaidas],
+];
 const atual=()=>{const h=location.hash.replace(/^#\/?/,'');
-  return VIEWS.find(v=>v[0]===h)||VIEWS[0];};
+  return VIEWS.find(v=>v[0]===h)||null;};
 function pinta(){
+  const h=location.hash.replace(/^#\/?/,'');
   const v=atual();
-  el('view').innerHTML=v[2]();
-  v[3]&&v[3]();
+  const oc=!v&&ROTAS_OCULTAS.find(x=>x[0]===h);
+  if(v){el('view').innerHTML=v[2]();v[3]&&v[3]();}
+  else if(oc){el('view').innerHTML=oc[1]();oc[2]&&oc[2]();}
+  else{el('view').innerHTML=VIEWS[0][2]();VIEWS[0][3]();}
   el('tabs').innerHTML=VIEWS.map(x=>`<a href="#/${x[0]}" class="${x===v?'on':''}">${x[1]}</a>`).join('');
 }
 function rota(){pinta();window.scrollTo({top:0});}
